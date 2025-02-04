@@ -33,7 +33,7 @@ const Home = () => {
 							<Avatar
 								uri={userData?.image ?? undefined}
 								size={hp(4.3)}
-								style={{borderWidth: 2}}
+								// style={{borderWidth: 2}}
 							/>
 						</Pressable>
 					</View>

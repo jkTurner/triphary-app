@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Stack, useRouter } from 'expo-router'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
-import { User } from '@supabase/supabase-js'
+import { AuthChangeEvent, User } from '@supabase/supabase-js'
 import { getUserService } from '@/services/userService'
 
 const _layout = () => {
@@ -33,18 +33,35 @@ const MainLayout = () => {
 	};
 
 	useEffect(() => {
-		supabase.auth.onAuthStateChange((_event, session) => {
-			console.log('📥 session user: ', session?.user);
 
-			if (session?.user) {
-				setUserState(session.user);
+		// 1. check initial auth state (on app load)
+		supabase.auth.getSession().then(({ data: { session } }) => {
+			setUserState(session?.user || null);
+			if(session?.user) {
 				fetchAndUpdateUserData(session.user);
-				router.replace('/home');
+				router.replace('/home')
 			} else {
-				setUserState(null);
-				router.replace('/welcome');
+				router.replace('/welcome')
 			}
 		})
+
+		// 2. listen only for sign-in / sign-out events
+		const {data: authListener } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session) => {
+			if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+				setUserState(session?.user || null);
+				if (session?.user) {
+					fetchAndUpdateUserData(session.user);
+					router.replace('/home');
+				} else {
+					router.replace('/welcome');
+				}
+			}
+		});
+
+		return () => {
+			authListener?.subscription.unsubscribe();
+		};
+
 	}, []);
 
 	return (
@@ -53,5 +70,4 @@ const MainLayout = () => {
 }
 
 export default _layout
-
 
