@@ -1,4 +1,4 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, TextStyle, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, TextStyle, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import ScreenWrapper from '@/components/ScreenWrapper';
 import Header from '@/components/Header';
@@ -12,7 +12,7 @@ import { DeleteIcon, ImageIcon, VideoIcon } from '@/assets/icons/Icons';
 import Button from '@/components/Button';
 import * as ImagePicker from 'expo-image-picker'
 import { getSupabaseFileUrl, getUserImageSrc, uploadFile } from '@/services/imageService';
-import { ResizeMode, Video } from 'expo-av';
+import { useVideoPlayer, VideoPlayer, VideoView } from 'expo-video';
 
 const NewPost = () => {
 	const { userData } = useAuth();
@@ -44,10 +44,6 @@ const NewPost = () => {
 		}
 	};
 
-	useEffect(() => {
-		console.log("📸 (UseEffect) File State Updated: ", file);
-	}, [file])
-
 	const isLocalFile = (file: ImagePicker.ImagePickerAsset | string | null): boolean => {
 		if (!file) return false;
 		return typeof file === 'object';
@@ -74,6 +70,10 @@ const NewPost = () => {
 		return typeof file === "string" ? getSupabaseFileUrl(file)?.uri ?? null : null;
 	};
 
+	const videoPlayer = useVideoPlayer(getUserImageSrc(file), player => {
+		player.loop = true;
+		player.play();
+	  });
 
 	const onSubmit = async () => {
 		if (!file) {
@@ -128,6 +128,7 @@ const NewPost = () => {
 				<Header title="Create Post" showBackButton={true} />
 				<ScrollView contentContainerStyle={{ gap: 20 }}>
 					{/* user info */}
+
 					<View style={styles.userHeader}>
 						<Pressable onPress={() => router.push('/profile')}>
 							<Avatar uri={userData?.image ?? undefined} size={50} />
@@ -141,6 +142,7 @@ const NewPost = () => {
 					<RichTextEditor onChange={handleTextChange} />
 
 					{/* add media */}
+
 					<View style={styles.media}>
 						<Text style={styles.addImageText}>Add Media</Text>
 						<View style={styles.mediaIcons}>
@@ -157,12 +159,10 @@ const NewPost = () => {
 					{file && (
 						<View style={styles.file}>
 							{getFileType(file) === "video" ? (
-								<Video
-									source={getUserImageSrc(file)}
-									style={{flex: 1}}
-									useNativeControls
-									resizeMode={ResizeMode.COVER}
-									isLooping
+								<VideoView
+									player={videoPlayer}
+									style={styles.video}
+									nativeControls
 								/>
 							) : (
 								<Image
@@ -177,6 +177,7 @@ const NewPost = () => {
 							</Pressable>
 						</View>
 					)}
+
 				</ScrollView>
 
 				<Button title="POST" loading={loading} onPress={onSubmit} />
@@ -232,12 +233,11 @@ const styles = StyleSheet.create({
 		color: theme.colors.text,
 	},
 	file: {
-		height: hp(30),
 		width: '100%',
+		height: hp(30),
 		borderRadius: theme.radius.xl,
-		overflow: 'hidden',
-		borderCurve: 'continuous',
-	},
+		// backgroundColor: 'red',
+	  },
 	mediaPreview: {
 		// width: '100%'
 		// aspectRatio: 4 / 3,
@@ -249,103 +249,10 @@ const styles = StyleSheet.create({
 		padding: 7,
 		borderRadius: 50,
 		backgroundColor: 'rgba(0,0,0,0.5)',
-	}
+	},
+	video: {
+		width: '100%',
+		height: hp(24),
+		// flex: 1
+	},
 });
-
-
-
-// import { Pressable, ScrollView, StyleSheet, Text, TextStyle, View } from 'react-native'
-// import React, { useRef, useState } from 'react'
-// import ScreenWrapper from '@/components/ScreenWrapper'
-// import Header from '@/components/Header'
-// import { hp, wp } from '@/helpers/common'
-// import { useAuth } from '@/context/AuthContext'
-// import Avatar from '@/components/Avatar'
-// import { useRouter } from 'expo-router'
-// import { theme } from '@/constants/theme'
-// import { RichEditor } from 'react-native-pell-rich-editor'
-// import MyTextEditor from '@/components/MyTextEditor'
-// import RichTextEditor from '@/components/RichTextEditor'
-
-// const NewPost = () => {
-
-// 	const { userData } = useAuth();
-// 	const router = useRouter();
-// 	const textBodyRef = useRef("");
-// 	const editorRef = useRef<RichEditor | null>(null);
-// 	const [loading, setLoading] = useState(false);
-// 	const [file, setFile] = useState<File | null>(null);
-
-// 	return (
-// 		<ScreenWrapper>
-// 			<View style={styles.container}>
-// 				<Header title="Create Post" showBackButton={true} />
-// 				<ScrollView contentContainerStyle={{gap: 20}}>
-
-// 					{/* user info */}
-// 					<View style={styles.userHeader}>
-// 						<Pressable onPress={()=> router.push('/profile')}>
-// 							<Avatar
-// 								uri={userData?.image ?? undefined}
-// 								size={hp(6.5)}
-// 								// style={{borderWidth: 2}}
-// 							/>
-// 						</Pressable>
-// 						<View style={{gap: 2}}>
-// 							<Text style={styles.userName}>
-// 								{ userData && userData.name }
-// 							</Text>
-// 							<Text style={styles.publicText}>
-// 								Public
-// 							</Text>
-// 						</View>
-// 					</View>
-
-// 					{/* user info */}
-// 					<View style={styles.textEditor}>
-// 						{/* <MyTextEditor /> */}
-// 						<RichTextEditor
-// 							editorRef={editorRef}
-// 							onChange={(textBody) => { textBodyRef.current = textBody; }}
-// 						/>
-// 					</View>
-
-// 				</ScrollView>
-// 			</View>
-// 		</ScreenWrapper>
-// 		// <DomWrapper />
-// 	)
-// }
-
-// export default NewPost
-
-// const styles = StyleSheet.create({
-// 	container: {
-// 		flex: 1,
-// 		marginBottom: 30,
-// 		paddingHorizontal: wp(4),
-// 		gap: 15,
-// 	},
-// 	userHeader: {
-// 		flexDirection: 'row',
-// 		alignItems: 'center',
-// 		gap: 12,
-// 	},
-// 	userName: {
-// 		fontSize: hp(2.2),
-// 		fontWeight: theme.fonts.semibold as TextStyle['fontWeight'],
-// 		color: theme.colors.text,
-// 	},
-// 	publicText: {
-// 		fontSize: hp(1.7),
-// 		fontWeight: theme.fonts.medium as TextStyle['fontWeight'],
-// 		color: theme.colors.textLight,
-// 	},
-// 	textEditor: {
-
-// 	}
-// })
-
-
-
-
