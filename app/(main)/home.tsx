@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { hp, wp } from '@/helpers/common'
 import { theme } from '@/constants/theme'
-import { CirclePlusIcon, NotificationIcon, UserIcon } from '@/assets/icons/Icons'
+import { CirclePlusIcon, EditIcon, NotificationIcon, UserIcon } from '@/assets/icons/Icons'
 import { useRouter } from 'expo-router'
 import Avatar from '@/components/Avatar'
 
@@ -23,6 +23,9 @@ const Home = () => {
 				<View style={styles.header}>
 					<Text style={styles.title}>Triphary</Text>
 					<View style={styles.icons}>
+						<Pressable onPress={()=> router.push('/testing')}>
+							<EditIcon size={hp(3.2)} strokeWidth={1.5} color={theme.colors.text} />
+						</Pressable>
 						<Pressable onPress={()=> router.push('/notifications')}>
 							<NotificationIcon size={hp(3.2)} strokeWidth={1.5} color={theme.colors.text} />
 						</Pressable>

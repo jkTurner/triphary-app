@@ -292,7 +292,7 @@ export const CameraIcon = (props: CustomSvgProps) => {
 	)
 };
 
-export const AddressIcon = (props: SvgProps) => {
+export const AddressIcon = (props: CustomSvgProps) => {
 
 	const { strokeWidth, size, color, ...otherProps } = { ...defaultProps, ...props }
 
@@ -304,6 +304,73 @@ export const AddressIcon = (props: SvgProps) => {
 				strokeWidth={strokeWidth}
 			/>
 			<Path d="M15.5 11C15.5 12.933 13.933 14.5 12 14.5C10.067 14.5 8.5 12.933 8.5 11C8.5 9.067 10.067 7.5 12 7.5C13.933 7.5 15.5 9.067 15.5 11Z"
+				stroke={color}
+				strokeWidth={strokeWidth}
+			/>
+		</Svg>
+	)
+}
+
+export const ImageIcon = (props: CustomSvgProps) => {
+
+	const { strokeWidth, size, color, ...otherProps } = { ...defaultProps, ...props }
+
+	return (
+		<Svg viewBox="0 0 24 24" width={size} height={size} color={color} fill="none" {...props}>
+			<Path d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z" stroke="currentColor" strokeWidth="1.5" />
+			<Circle cx="16.5" cy="7.5" r="1.5"
+				stroke={color}
+				strokeWidth={strokeWidth}
+			/>
+			<Path d="M16 22C15.3805 19.7749 13.9345 17.7821 11.8765 16.3342C9.65761 14.7729 6.87163 13.9466 4.01569 14.0027C3.67658 14.0019 3.33776 14.0127 3 14.0351"
+				stroke={color}
+				strokeWidth={strokeWidth}
+				strokeLinejoin="round"
+			/>
+			<Path d="M13 18C14.7015 16.6733 16.5345 15.9928 18.3862 16.0001C19.4362 15.999 20.4812 16.2216 21.5 16.6617"
+				stroke={color}
+				strokeWidth={strokeWidth}
+				strokeLinejoin="round"
+			/>
+		</Svg>
+	)
+};
+
+
+export const VideoIcon = (props: CustomSvgProps) => {
+
+	const { strokeWidth, color, size, ...otherProps } = { ...defaultProps, ...props };
+
+	return (
+		<Svg viewBox="0 0 24 24" width={size} height={size} color={color} fill="none" {...props}>
+			<Path d="M17.7001 21.3351C16.5281 21.4998 14.9996 21.4998 12.9501 21.4998H11.0501C7.01955 21.4998 5.0043 21.4998 3.75218 20.2476C2.50006 18.9955 2.50006 16.9803 2.50006 12.9498V11.0498C2.50006 7.01925 2.50006 5.00399 3.75218 3.75187C5.0043 2.49976 7.01955 2.49976 11.0501 2.49976H12.9501C16.9806 2.49976 18.9958 2.49976 20.2479 3.75187C21.5001 5.00399 21.5001 7.01925 21.5001 11.0498V12.9498C21.5001 14.158 21.5001 15.1851 21.4663 16.0648C21.4393 16.7699 21.4258 17.1224 21.1588 17.2541C20.8918 17.3859 20.5932 17.1746 19.9958 16.752L18.6501 15.7998"
+				stroke={color}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				/>
+			<Path d="M14.9453 12.3948C14.7686 13.0215 13.9333 13.4644 12.2629 14.3502C10.648 15.2064 9.8406 15.6346 9.18992 15.4625C8.9209 15.3913 8.6758 15.2562 8.47812 15.07C8 14.6198 8 13.7465 8 12C8 10.2535 8 9.38018 8.47812 8.92995C8.6758 8.74381 8.9209 8.60868 9.18992 8.53753C9.8406 8.36544 10.648 8.79357 12.2629 9.64983C13.9333 10.5356 14.7686 10.9785 14.9453 11.6052C15.0182 11.8639 15.0182 12.1361 14.9453 12.3948Z"
+				stroke={color}
+				strokeWidth={strokeWidth}
+				strokeLinejoin="round"
+			/>
+		</Svg>
+	)
+}
+
+export const DeleteIcon = (props: CustomSvgProps) => {
+
+	const { strokeWidth, color, size, ...otherProps } = { ...defaultProps, ...props }
+
+	return (
+		<Svg viewBox="0 0 24 24" width={size} height={size} color={color} fill="none" {...props}>
+			<Path d="M15 9L9 14.9996M15 15L9 9.00039"
+				stroke={color}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+			<Path d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z"
 				stroke={color}
 				strokeWidth={strokeWidth}
 			/>
