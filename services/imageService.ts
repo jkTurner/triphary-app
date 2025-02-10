@@ -2,26 +2,26 @@ import { supabaseUrl } from "@/constants";
 
 // this function makes sure to return an object doesn't matter the type of image path
 export const getUserImageSrc = (imagePath?: string | { uri: string } | null) => {
-    console.log("🖼 getUserImageSrc called with:", imagePath);
+    console.log("▶️ getUserImageSrc called with:", imagePath);
 
     // Check if `imagePath` is an object with a valid `uri` property
     if (typeof imagePath === "object" && imagePath !== null && "uri" in imagePath) {
-        console.log("📂 Returning local file (from object):", imagePath.uri);
+        console.log("▶️ (getUserImageSrc) Returning local file (from object):", imagePath.uri);
         return imagePath; // ✅ Directly return the object
     }
 
     // Check if `imagePath` is a valid string
     if (typeof imagePath !== 'string' || imagePath.trim() === '') {
-        console.log("🔄 Returning default image");
+        console.log("▶️ (getUserImageSrc) Returning default image");
         return require('@/assets/images/profile-default.jpg'); // require() returns an object
     }
 
     if (imagePath.startsWith('file://')) {
-        console.log("📂 Returning local file:", imagePath);
+        console.log("▶️ (getUserImageSrc) Returning local file:", imagePath);
         return { uri: imagePath }; // ✅ Local file (selected image) (return in object form {uri: iamgePath} )
     }
 
-    console.log("☁️ Returning Supabase URL:", getSupabaseFileUrl(imagePath));
+    console.log("▶️ (getUserImageSrc) Returning Supabase URL:", getSupabaseFileUrl(imagePath));
     return getSupabaseFileUrl(imagePath); // ✅ Supabase stored image
 };
 
@@ -39,7 +39,7 @@ import { supabase } from '@/lib/supabase';
 export const uploadFile = async (folderName: string, fileUri: string, isImage = true) => {
 	try {
 
-		console.log("📤 Uploading file:", fileUri); // ✅ Check if this function runs
+		console.log("📤 UploadFile called with:", fileUri); // ✅ Check if this function runs
 
 		// extract file extension to use when uploading to supabase
 		let fileExtension = fileUri.split('.').pop() || 'png'; // Default to PNG if undefined
@@ -48,7 +48,7 @@ export const uploadFile = async (folderName: string, fileUri: string, isImage = 
 		// eg. /profile_pictures/1706907891234.png
 		let fileName = getFilePath(folderName, fileExtension);
 
-		console.log("📝 Generated File Path:", fileName); // ✅ Verify file path
+		console.log("📤 Generated File Path:", fileName); // ✅ Verify file path
 
 		// convert local image to base64
 		const fileBase64 = await FileSystem.readAsStringAsync(fileUri, {

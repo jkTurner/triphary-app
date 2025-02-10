@@ -5,7 +5,6 @@ import { theme } from '@/constants/theme'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import Header from '@/components/Header'
 import Avatar from '@/components/Avatar'
-import { Image } from 'expo-image'
 import { AddressIcon, BookOpenIcon, CameraIcon, PhoneIcon, UserIcon } from '@/assets/icons/Icons'
 import Input from '@/components/Input'
 import { useAuth } from '@/context/AuthContext'
@@ -38,8 +37,8 @@ const editProfile = () => {
 				image: userData?.image || null,
 				address: userData?.address || '',
 				bio: userData?.bio || '',
-
 			})
+			console.log("🟡 Set user in useEffect.")
 		}
 	}, [currentUser, userData])
 
@@ -51,7 +50,7 @@ const editProfile = () => {
 			quality: 0.7,
 		});
 
-		console.log("📸 Image Picker Result:", result); // ✅ Check what the user picked
+		console.log("🟡 Image Picker Result:", result); // ✅ Check what the user picked
 
 		if (!result.canceled) {
 			console.log("✅ Selected Image URI:", result.assets[0].uri);
@@ -71,7 +70,7 @@ const editProfile = () => {
 			return;
 		}
 
-		console.log("🚀 Submitting Profile Update..."); // ✅ Check if function runs
+		console.log("🚀 Submitting Profile Update..."); // just checking if the function runs
     	setLoading(true);
 
 		let imageUrl = user.image; // default to current image
@@ -83,13 +82,13 @@ const editProfile = () => {
 
 			if (!uploadResult.success) {
 				setLoading(false);
-				Alert.alert("Edit Profile", "Failed to upload image.");
+				Alert.alert("❌ Edit Profile", "Failed to upload image.");
 				return;
 			}
 
 			// get new image url from supabase
 			imageUrl = uploadResult.data ?? null; // we will use this to set new profile pic right the way
-			console.log("✅ Image URL from Supabase: ", imageUrl);
+			console.log("🟢 Image URL from Supabase: ", imageUrl);
 		}
 
 		const updatedUserData = {
@@ -97,16 +96,16 @@ const editProfile = () => {
 			image: imageUrl,
 		};
 
-		console.log("📝 Updating User Profile:", updatedUserData);
+		console.log("🟡 Updated User Profile:", updatedUserData);
 
 		const res = await updateUserService(currentUser.id, updatedUserData);
 		setLoading(false);
 
-		console.log("Update response:", res); // Check if the server responds correctly
+		console.log("🟡 Supabase update response:", res); // check if the server responds correctly
 
 		if (res.success) {
 			updateUserData(updatedUserData); // make sure the profile page has the updated data right away
-			console.log("✅ Profile Updated Successfully!");
+			console.log("🟢 Profile Updated Successfully!");
 		} else {
 			console.error("❌ Profile Update Failed:", res);
 		}
@@ -236,7 +235,6 @@ const styles = StyleSheet.create({
 		paddingVertical: 15,
 	}
 })
-
 
 
 
