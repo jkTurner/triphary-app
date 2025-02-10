@@ -1,4 +1,4 @@
-import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, TextStyle, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, TextStyle, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import ScreenWrapper from '@/components/ScreenWrapper';
 import Header from '@/components/Header';
@@ -15,7 +15,7 @@ import { getSupabaseFileUrl, getUserImageSrc, uploadFile } from '@/services/imag
 import { useVideoPlayer, VideoPlayer, VideoView } from 'expo-video';
 
 const NewPost = () => {
-	const { userData } = useAuth();
+	const { user, userData } = useAuth();
 	const router = useRouter();
 	// const bodyRef = useRef("");
 	// const editorRef = useRef(null);
@@ -70,19 +70,33 @@ const NewPost = () => {
 		return typeof file === "string" ? getSupabaseFileUrl(file)?.uri ?? null : null;
 	};
 
-	const videoPlayer = useVideoPlayer(getUserImageSrc(file), player => {
+	const videoUri = getFileUri(file); // Ensures it's a valid URI
+
+	const videoPlayer = useVideoPlayer(videoUri ?? '', (player) => {
 		player.loop = true;
 		player.play();
 	  });
 
 	const onSubmit = async () => {
-		if (!file) {
-			console.log("❌ No file selected");
+
+		if (!richText.trim()) {
+			console.log("❌ No content to post");
+			Alert.alert('Post', "Please add text to the post.");
 			return;
+		}
+
+		console.log("Begin the POST process");
+
+		const data = {
+			file,
+			body: richText,
+			userId: user?.id,
 		}
 
 		try {
 			setLoading(true);
+
+			console.log("📝 Post Content: ", richText);
 
 			const fileType = getFileType(file);
 			if (fileType === "unknown") {

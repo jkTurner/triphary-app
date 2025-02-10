@@ -20,7 +20,6 @@ const editProfile = () => {
 
 	const {user: currentUser, userData, updateUserData} = useAuth();
 	const [loading, setLoading] = useState(false);
-	const [image, setImage] = useState<string | null>(null);
 	const router = useRouter();
 
 	const [user, setUser] = useState({
@@ -60,7 +59,7 @@ const editProfile = () => {
 		}
 	};
 
-	let imageSource = user.image?.startsWith('file://') ? { uri: user.image } : getUserImageSrc(user.image);
+	const imageSource = getUserImageSrc(user.image);
 
 	const onSubmit = async () => {
 		if (!currentUser?.id) {
@@ -75,7 +74,8 @@ const editProfile = () => {
 		console.log("🚀 Submitting Profile Update..."); // ✅ Check if function runs
     	setLoading(true);
 
-		let imageUrl: string | null = user.image; // default to current image
+		let imageUrl = user.image; // default to current image
+
 		// check if the user selected a new image
 		if (user.image && user.image.startsWith('file://')) {
 
@@ -88,8 +88,8 @@ const editProfile = () => {
 			}
 
 			// get new image url from supabase
-			imageUrl = uploadResult.data ?? null;
-			console.log("✅ Uploaded Image Path:", imageUrl);
+			imageUrl = uploadResult.data ?? null; // we will use this to set new profile pic right the way
+			console.log("✅ Image URL from Supabase: ", imageUrl);
 		}
 
 		const updatedUserData = {
@@ -236,3 +236,8 @@ const styles = StyleSheet.create({
 		paddingVertical: 15,
 	}
 })
+
+
+
+
+
