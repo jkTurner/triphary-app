@@ -11,7 +11,7 @@ import { hp } from '@/helpers/common';
 import { DeleteIcon, ImageIcon, VideoIcon } from '@/assets/icons/Icons';
 import Button from '@/components/Button';
 import * as ImagePicker from 'expo-image-picker'
-import { getSupabaseFileUrl, getUserImageSrc, uploadFile } from '@/services/imageService';
+import { getSupabaseFileUrl, getUserMediaSrc, uploadFile } from '@/services/imageService';
 import { useVideoPlayer, VideoPlayer, VideoView } from 'expo-video';
 
 const NewPost = () => {
@@ -180,7 +180,7 @@ const NewPost = () => {
 								/>
 							) : (
 								<Image
-									source={getUserImageSrc(file)}
+									source={getUserMediaSrc(file)}
 									resizeMode="cover"
 									style={styles.mediaPreview}
 								/>

@@ -9,7 +9,7 @@
 // import { AddressIcon, BookOpenIcon, CameraIcon, PhoneIcon, UserIcon } from '@/assets/icons/Icons'
 // import Input from '@/components/Input'
 // import { useAuth } from '@/context/AuthContext'
-// import { getUserImageSrc, uploadFile } from '@/services/imageService'
+// import { getUserMediaSrc, uploadFile } from '@/services/imageService'
 // import Button from '@/components/Button'
 // import { updateUserService } from '@/services/userService'
 // import { useRouter } from 'expo-router'
@@ -60,7 +60,7 @@
 // 		}
 // 	};
 
-// 	let imageSource = user.image?.startsWith('file://') ? { uri: user.image } : getUserImageSrc(user.image);
+// 	let imageSource = user.image?.startsWith('file://') ? { uri: user.image } : getUserMediaSrc(user.image);
 
 // 	const onSubmit = async () => {
 // 		if (!currentUser?.id) {

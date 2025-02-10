@@ -5,7 +5,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import { DeleteIcon } from "@/assets/icons/Icons";
-import { getUserImageSrc } from "@/services/imageService";
+import { getUserMediaSrc } from "@/services/imageService";
 
 const Testing = () => {
   const [file, setFile] = useState<ImagePicker.ImagePickerAsset | null>(null);
@@ -15,7 +15,7 @@ const Testing = () => {
   const isVideo = file?.type === "video";
 
   // Video player instance
-  const videoPlayer = useVideoPlayer(getUserImageSrc(file), (player) => {
+  const videoPlayer = useVideoPlayer(getUserMediaSrc(file), (player) => {
     player.loop = true;
     player.play();
   });

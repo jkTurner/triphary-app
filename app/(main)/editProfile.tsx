@@ -8,7 +8,7 @@ import Avatar from '@/components/Avatar'
 import { AddressIcon, BookOpenIcon, CameraIcon, PhoneIcon, UserIcon } from '@/assets/icons/Icons'
 import Input from '@/components/Input'
 import { useAuth } from '@/context/AuthContext'
-import { getUserImageSrc, uploadFile } from '@/services/imageService'
+import { getUserMediaSrc, uploadFile } from '@/services/imageService'
 import Button from '@/components/Button'
 import { updateUserService } from '@/services/userService'
 import { useRouter } from 'expo-router'
@@ -58,7 +58,7 @@ const editProfile = () => {
 		}
 	};
 
-	const imageSource = getUserImageSrc(user.image);
+	const imageSource = getUserMediaSrc(user.image);
 
 	const onSubmit = async () => {
 		if (!currentUser?.id) {
@@ -235,7 +235,6 @@ const styles = StyleSheet.create({
 		paddingVertical: 15,
 	}
 })
-
 
 
 

@@ -1,27 +1,27 @@
 import { supabaseUrl } from "@/constants";
 
 // this function makes sure to return an object doesn't matter the type of image path
-export const getUserImageSrc = (imagePath?: string | { uri: string } | null) => {
-    console.log("▶️ getUserImageSrc called with:", imagePath);
+export const getUserMediaSrc = (imagePath?: string | { uri: string } | null) => {
+    console.log("▶️ getUserMediaSrc called with:", imagePath);
 
     // Check if `imagePath` is an object with a valid `uri` property
     if (typeof imagePath === "object" && imagePath !== null && "uri" in imagePath) {
-        console.log("▶️ (getUserImageSrc) Returning local file (from object):", imagePath.uri);
+        console.log("▶️ (getUserMediaSrc) Returning local file (from object):", imagePath.uri);
         return imagePath; // ✅ Directly return the object
     }
 
     // Check if `imagePath` is a valid string
     if (typeof imagePath !== 'string' || imagePath.trim() === '') {
-        console.log("▶️ (getUserImageSrc) Returning default image");
+        console.log("▶️ (getUserMediaSrc) Returning default image");
         return require('@/assets/images/profile-default.jpg'); // require() returns an object
     }
 
     if (imagePath.startsWith('file://')) {
-        console.log("▶️ (getUserImageSrc) Returning local file:", imagePath);
+        console.log("▶️ (getUserMediaSrc) Returning local file:", imagePath);
         return { uri: imagePath }; // ✅ Local file (selected image) (return in object form {uri: iamgePath} )
     }
 
-    console.log("▶️ (getUserImageSrc) Returning Supabase URL:", getSupabaseFileUrl(imagePath));
+    console.log("▶️ (getUserMediaSrc) Returning Supabase URL:", getSupabaseFileUrl(imagePath));
     return getSupabaseFileUrl(imagePath); // ✅ Supabase stored image
 };
 

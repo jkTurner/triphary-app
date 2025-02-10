@@ -2,7 +2,7 @@ import { StyleProp, StyleSheet } from 'react-native'
 import React from 'react'
 import { Image, ImageStyle } from 'expo-image';
 import { theme } from '@/constants/theme';
-import { getUserImageSrc } from '@/services/imageService';
+import { getUserMediaSrc } from '@/services/imageService';
 
 interface AvatarProps {
 	uri?: string;
@@ -21,7 +21,7 @@ const Avatar: React.FC<AvatarProps> = ({
 
 	return (
 		<Image
-			source={getUserImageSrc(uri)}
+			source={getUserMediaSrc(uri)}
 			// source={uri}
 			transition={100}
 			style={[styles.avatar, {height: size, width: size, borderRadius: size / 2 }, style]}
