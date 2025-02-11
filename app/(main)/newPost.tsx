@@ -50,6 +50,14 @@ const NewPost = () => {
 		}
 	};
 
+	const handleNavigation = () => {
+		if (router.canGoBack()) {
+		  router.back();
+		} else {
+		  router.push('/home');
+		}
+	};
+
 	const onSubmit = async () => {
 
 		if (!richText.trim()) {
@@ -75,22 +83,13 @@ const NewPost = () => {
 			setMediaUri(null);
 			setMediaType(null);
 			setRichText('');
+
+			Alert.alert(
+				"Create Post",
+				"Successfully Created a Post",
+				[{ text: "OK", onPress: () => handleNavigation() }]
+			);
 		}
-
-		Alert.alert(
-			"Create Post",
-			"Successfully Created a Post",
-			[{ text: "OK", onPress: () => handleNavigation() }]
-		  );
-
-		  const handleNavigation = () => {
-			if (router.canGoBack()) {
-			  router.back();
-			} else {
-			  router.push('/home');
-			}
-		  };
-
 	};
 
 	return (
