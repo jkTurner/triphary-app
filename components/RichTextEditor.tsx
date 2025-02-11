@@ -49,6 +49,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ onChange }) => {
   );
 };
 
+export default RichTextEditor;
+
 const styles = StyleSheet.create({
   container: {
 	flex: 1,
@@ -79,7 +81,6 @@ const styles = StyleSheet.create({
   }
 });
 
-export default RichTextEditor;
 
 
 

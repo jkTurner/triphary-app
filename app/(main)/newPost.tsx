@@ -7,26 +7,32 @@ import Avatar from '@/components/Avatar';
 import { useRouter } from 'expo-router';
 import { theme } from '@/constants/theme';
 import RichTextEditor from '@/components/RichTextEditor';
-import { hp } from '@/helpers/common';
+import { hp, wp } from '@/helpers/common';
 import { DeleteIcon, ImageIcon, VideoIcon } from '@/assets/icons/Icons';
 import Button from '@/components/Button';
 import * as ImagePicker from 'expo-image-picker'
-import { getSupabaseFileUrl, getUserMediaSrc, uploadFile } from '@/services/imageService';
-import { useVideoPlayer, VideoPlayer, VideoView } from 'expo-video';
+import { getUserMediaSrc, uploadFile } from '@/services/imageService';
+import { useVideoPlayer, VideoView } from 'expo-video';
 
 const NewPost = () => {
 	const { user, userData } = useAuth();
-	const router = useRouter();
 	// const bodyRef = useRef("");
 	// const editorRef = useRef(null);
 	const [loading, setLoading] = useState(false);
-	const [file, setFile] = useState<ImagePicker.ImagePickerAsset | null>(null);
-
+	const [mediaUri, setMediaUri] = useState<string | null>(null);
+	const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
 	const [richText, setRichText] = useState('');
 
+	const router = useRouter();
+
 	const handleTextChange = (text: string) => {
-	setRichText(text);
+		setRichText(text);
 	};
+
+	const videoPlayer = useVideoPlayer(mediaUri ?? '', (player) => {
+		player.loop = true;
+		player.play();
+	});
 
 	const onPick = async (isImage: boolean) => {
 		const result = await ImagePicker.launchImageLibraryAsync({
@@ -37,104 +43,69 @@ const NewPost = () => {
 		});
 
 		if (!result.canceled) {
-			console.log("✅(newPost.tsx) Selected Image file:", result.assets[0].uri);
-			setFile(result.assets[0]); // ✅ Correctly setting the file
+			console.log("✅ Selected Media:", result.assets[0].uri);
+			setMediaUri(result.assets[0].uri);
+			setMediaType(isImage ? 'image' : 'video')
 		} else {
-			console.log("❌(newPost.tsx) user canceled the picker");
+			console.log("❌ User canceled the picker");
 		}
 	};
-
-	const isLocalFile = (file: ImagePicker.ImagePickerAsset | string | null): boolean => {
-		if (!file) return false;
-		return typeof file === 'object';
-	}
-
-	const getFileType = (file: ImagePicker.ImagePickerAsset | string | null): "image" | "video" | "unknown" => {
-		if (!file) return "unknown";
-
-		if (isLocalFile(file)) {
-			const assetType = (file as ImagePicker.ImagePickerAsset).type;
-			return assetType === "image" || assetType === "video" ? assetType : "unknown";
-		}
-
-		return typeof file === "string" && file.includes("postImage") ? "image" : "video";
-	};
-
-	const getFileUri = (file: ImagePicker.ImagePickerAsset | string | null): string | null => {
-		if (!file) return null;
-
-		if (typeof file === "object" && "uri" in file) {
-			return file.uri; // ✅ Ensure we return the local file URI
-		}
-
-		return typeof file === "string" ? getSupabaseFileUrl(file)?.uri ?? null : null;
-	};
-
-	const videoUri = getFileUri(file); // Ensures it's a valid URI
-
-	const videoPlayer = useVideoPlayer(videoUri ?? '', (player) => {
-		player.loop = true;
-		player.play();
-	  });
 
 	const onSubmit = async () => {
 
 		if (!richText.trim()) {
-			console.log("❌ No content to post");
 			Alert.alert('Post', "Please add text to the post.");
 			return;
 		}
 
-		console.log("Begin the POST process");
+		console.log("🚀 Sibmitting Post...");
+		setLoading(true);
 
-		const data = {
-			file,
+		let mediaUrl = mediaUri;
+
+		if (mediaUri && mediaUri.startsWith('file://')) {
+			const folderName = mediaType === 'image' ? 'post_images' : 'post_videos';
+			const uploadResult = await uploadFile(folderName, mediaUri, mediaType == 'image' ? true : false)
+
+			if (!uploadResult.success) {
+				setLoading(false);
+				Alert.alert("❌ Post Upload", "Failed to upload media.");
+				return;
+			}
+
+			mediaUrl = uploadResult.data ?? null;
+			console.log("🟢 Media URL from Supabase: ", mediaUrl);
+		}
+
+		const postData = {
 			body: richText,
 			userId: user?.id,
-		}
+			media: mediaUrl,
+			mediaType: mediaType || undefined,
+		};
 
-		try {
-			setLoading(true);
+		console.log("🟡 Final Post Data: ", postData);
 
-			console.log("📝 Post Content: ", richText);
+		setLoading(false);
+		setMediaUri(null);
+		setMediaType(null);
+		setRichText('');
 
-			const fileType = getFileType(file);
-			if (fileType === "unknown") {
-				console.log("❌ Unsupported file type");
-				return;
+		Alert.alert(
+			"Create Post",
+			"Successfully Created a Post",
+			[{ text: "OK", onPress: () => handleNavigation() }]
+		  );
+
+		  const handleNavigation = () => {
+			if (router.canGoBack()) {
+			  router.back();
+			} else {
+			  router.push('/home');
 			}
+		  };
 
-			const folderName = fileType === "image" ? "post_images" : "post_videos";
-			const fileUri = getFileUri(file);
-			if (!fileUri) {
-				console.log("❌ File URI not found");
-				return;
-			}
-
-			console.log(`📤 Uploading to ${folderName}:`, fileUri);
-
-			// Upload file
-			const uploadResponse = await uploadFile(folderName, fileUri, fileType === "image");
-
-			if (!uploadResponse.success) {
-				console.error("❌ Upload failed:", uploadResponse.msg);
-				return;
-			}
-
-			console.log("✅ Upload successful! File Path:", uploadResponse.data);
-
-			// Reset state after upload
-			setFile(null);
-
-		} catch (error) {
-			console.error("❌ Error uploading file:", error);
-		} finally {
-			setLoading(false);
-		}
 	};
-
-
-	console.log('(newPost.tsx) ✅✅✅ file uri: ', getFileUri(file));
 
 	return (
 		<ScreenWrapper bg="white">
@@ -169,31 +140,32 @@ const NewPost = () => {
 						</View>
 					</View>
 
-					{/* preview media  */}
-					{file && (
+					{/* media preview  */}
+					{mediaUri && (
 						<View style={styles.file}>
-							{getFileType(file) === "video" ? (
+							{mediaType === "video" ? (
 								<VideoView
 									player={videoPlayer}
 									style={styles.video}
 									nativeControls
 								/>
 							) : (
-								<Image
-									source={getUserMediaSrc(file)}
-									resizeMode="cover"
-									style={styles.mediaPreview}
-								/>
+								<View>
+									<Image
+										source={getUserMediaSrc(mediaUri)}
+										resizeMode="cover"
+										style={styles.mediaPreview}
+									/>
+								</View>
 
 							)}
-							<Pressable style={styles.deleteIcon} onPress={() => setFile(null)}>
+							<Pressable style={styles.deleteIcon} onPress={() => setMediaUri(null)}>
 								<DeleteIcon color="white" size={22} />
 							</Pressable>
 						</View>
 					)}
 
 				</ScrollView>
-
 				<Button title="POST" loading={loading} onPress={onSubmit} />
 
 			</View>
@@ -253,8 +225,8 @@ const styles = StyleSheet.create({
 		// backgroundColor: 'red',
 	  },
 	mediaPreview: {
-		// width: '100%'
-		// aspectRatio: 4 / 3,
+		width: '100%',
+		height: hp(24),
 	},
 	deleteIcon: {
 		position: 'absolute',
@@ -270,3 +242,6 @@ const styles = StyleSheet.create({
 		// flex: 1
 	},
 });
+
+
+

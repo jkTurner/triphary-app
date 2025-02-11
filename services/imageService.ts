@@ -4,26 +4,36 @@ import { supabaseUrl } from "@/constants";
 export const getUserMediaSrc = (imagePath?: string | { uri: string } | null) => {
     console.log("▶️ getUserMediaSrc called with:", imagePath);
 
-    // Check if `imagePath` is an object with a valid `uri` property
-    if (typeof imagePath === "object" && imagePath !== null && "uri" in imagePath) {
-        console.log("▶️ (getUserMediaSrc) Returning local file (from object):", imagePath.uri);
-        return imagePath; // ✅ Directly return the object
-    }
-
-    // Check if `imagePath` is a valid string
-    if (typeof imagePath !== 'string' || imagePath.trim() === '') {
+    if (!imagePath) {
         console.log("▶️ (getUserMediaSrc) Returning default image");
-        return require('@/assets/images/profile-default.jpg'); // require() returns an object
+        return require('@/assets/images/profile-default.jpg');
     }
 
-    if (imagePath.startsWith('file://')) {
-        console.log("▶️ (getUserMediaSrc) Returning local file:", imagePath);
-        return { uri: imagePath }; // ✅ Local file (selected image) (return in object form {uri: iamgePath} )
+    if (typeof imagePath === "string") {
+        if (imagePath.trim() === '') {
+            console.log("▶️ (getUserMediaSrc) Empty string detected, returning default image");
+            return require('@/assets/images/profile-default.jpg');
+        }
+
+        if (imagePath.startsWith('file://')) {
+            console.log("▶️ (getUserMediaSrc) Returning local file:", imagePath);
+            return { uri: imagePath };
+        }
+
+        console.log("▶️ (getUserMediaSrc) Assuming Supabase URL:", getSupabaseFileUrl(imagePath));
+        return getSupabaseFileUrl(imagePath);
     }
 
-    console.log("▶️ (getUserMediaSrc) Returning Supabase URL:", getSupabaseFileUrl(imagePath));
-    return getSupabaseFileUrl(imagePath); // ✅ Supabase stored image
+    // If imagePath is already an object with a valid `uri` property
+    if (typeof imagePath === "object" && "uri" in imagePath) {
+        console.log("▶️ (getUserMediaSrc) Returning provided object URI:", imagePath.uri);
+        return imagePath;
+    }
+
+    console.log("❌ (getUserMediaSrc) Unexpected format, returning default image");
+    return require('@/assets/images/profile-default.jpg');
 };
+
 
 export const getSupabaseFileUrl = (filePath: string) => {
 	if(filePath) {
