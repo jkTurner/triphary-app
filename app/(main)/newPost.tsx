@@ -13,11 +13,10 @@ import Button from '@/components/Button';
 import * as ImagePicker from 'expo-image-picker'
 import { getUserMediaSrc, uploadFile } from '@/services/imageService';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import { createOrUpdatePost } from '@/services/postService';
 
 const NewPost = () => {
 	const { user, userData } = useAuth();
-	// const bodyRef = useRef("");
-	// const editorRef = useRef(null);
 	const [loading, setLoading] = useState(false);
 	const [mediaUri, setMediaUri] = useState<string | null>(null);
 	const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
@@ -61,35 +60,22 @@ const NewPost = () => {
 		console.log("🚀 Sibmitting Post...");
 		setLoading(true);
 
-		let mediaUrl = mediaUri;
-
-		if (mediaUri && mediaUri.startsWith('file://')) {
-			const folderName = mediaType === 'image' ? 'post_images' : 'post_videos';
-			const uploadResult = await uploadFile(folderName, mediaUri, mediaType == 'image' ? true : false)
-
-			if (!uploadResult.success) {
-				setLoading(false);
-				Alert.alert("❌ Post Upload", "Failed to upload media.");
-				return;
-			}
-
-			mediaUrl = uploadResult.data ?? null;
-			console.log("🟢 Media URL from Supabase: ", mediaUrl);
-		}
-
 		const postData = {
 			body: richText,
 			userId: user?.id,
-			media: mediaUrl,
-			mediaType: mediaType || undefined,
+			media: mediaUri ? { uri: mediaUri, type: mediaType }: null,
 		};
 
-		console.log("🟡 Final Post Data: ", postData);
+		const res = await createOrUpdatePost(postData);
 
-		setLoading(false);
-		setMediaUri(null);
-		setMediaType(null);
-		setRichText('');
+		console.log("🟡 Post Response: ", res);
+
+		if (res.success) {
+			setLoading(false);
+			setMediaUri(null);
+			setMediaType(null);
+			setRichText('');
+		}
 
 		Alert.alert(
 			"Create Post",
@@ -112,8 +98,8 @@ const NewPost = () => {
 			<View style={styles.container}>
 				<Header title="Create Post" showBackButton={true} />
 				<ScrollView contentContainerStyle={{ gap: 20 }}>
-					{/* user info */}
 
+					{/* user info */}
 					<View style={styles.userHeader}>
 						<Pressable onPress={() => router.push('/profile')}>
 							<Avatar uri={userData?.image ?? undefined} size={50} />
@@ -127,7 +113,6 @@ const NewPost = () => {
 					<RichTextEditor onChange={handleTextChange} />
 
 					{/* add media */}
-
 					<View style={styles.media}>
 						<Text style={styles.addImageText}>Add Media</Text>
 						<View style={styles.mediaIcons}>
