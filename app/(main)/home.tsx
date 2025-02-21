@@ -1,5 +1,5 @@
-import { Alert, Button, Pressable, StyleSheet, Text, TextStyle, View } from 'react-native'
-import React from 'react'
+import { Alert, Button, FlatList, Pressable, StyleSheet, Text, TextStyle, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
@@ -8,13 +8,46 @@ import { theme } from '@/constants/theme'
 import { CirclePlusIcon, EditIcon, NotificationIcon, UserIcon } from '@/assets/icons/Icons'
 import { useRouter } from 'expo-router'
 import Avatar from '@/components/Avatar'
+import { fetchPost } from '@/services/postService'
+import PostCard from '@/components/PostCard'
+
+interface Post {
+	id: string;
+	content: string;
+	created_at: string;
+	user: {
+		id: string;
+		name: string;
+		image?: string;
+	}
+}
+
+var limit = 0;
 
 const Home = () => {
 
 	const {user, userData, setUserState} = useAuth();
 	const router = useRouter();
 
-	console.log("👮 User (home): ", JSON.stringify(user, null, 2));
+	// console.log("👮 User (home): ", JSON.stringify(user, null, 2));
+
+	const [posts, setPosts] = useState<Post[]>([]);
+
+	const getPosts = async () => {
+
+		limit = limit + 10;
+		let res = await fetchPost();
+
+		console.log('fetching post: ', limit);
+
+		if (res.success) {
+			setPosts(res.data ?? []);
+		}
+	}
+
+	useEffect(() => {
+		getPosts();
+	}, [])
 
 	return (
 		<ScreenWrapper bg="white">
@@ -41,6 +74,25 @@ const Home = () => {
 						</Pressable>
 					</View>
 				</View>
+
+				{/* post */}
+				<FlatList
+					data={posts}
+					showsVerticalScrollIndicator={false}
+					contentContainerStyle={styles.listStyle}
+					keyExtractor={item => item.id.toString()}
+					renderItem={({ item }) =>
+						<PostCard
+							item={item}
+							currentUser={{
+								id: userData?.id ?? 'guest-id', // Ensure id is always a string
+								name: userData?.name ?? 'Guest',
+								image: userData?.image ?? undefined,
+							}}
+							router={router}
+						/>}
+				/>
+
 			</View>
 		</ScreenWrapper>
 	)

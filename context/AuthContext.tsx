@@ -4,6 +4,7 @@ import { createContext, ReactNode, useContext, useState } from "react";
 // these are for additional fields that exists in public.user
 
 export interface UserData {
+	id?: string;
 	name?: string;
 	phoneNumber?: string;
 	address?: string;

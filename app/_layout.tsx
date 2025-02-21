@@ -4,6 +4,13 @@ import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { AuthChangeEvent, User } from '@supabase/supabase-js'
 import { getUserService } from '@/services/userService'
+import { LogBox } from 'react-native'
+
+LogBox.ignoreLogs([
+	'Warning: TNodeChildrenRenderer',
+	'Warning: MemoizedTNodeRenderer',
+	'Warning: TRenderEngineProvider',
+])
 
 const _layout = () => {
 	return (
