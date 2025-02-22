@@ -28,10 +28,25 @@ const Home = () => {
 
 	const {user, userData, setUserState} = useAuth();
 	const router = useRouter();
-
-	// console.log("👮 User (home): ", JSON.stringify(user, null, 2));
-
 	const [posts, setPosts] = useState<Post[]>([]);
+	const [videoPlayerRefs, setVideoPlayerRefs] = useState<{ [key: string]: any }>({});
+
+	const handlePauseAllVideos = (currentId: string | number) => {
+		console.log(`▶️ Attempting to pause all videos except: ${currentId}`);
+
+		Object.entries(videoPlayerRefs).forEach(([postId, player]) => {
+			if (player) {
+				if (`${postId}` !== `${currentId}`) { // ✅ Ensure both are strings
+					console.log(`⏸ Pausing video with ID: ${postId}`);
+					player.pause();
+				} else {
+					console.log(`✅ Keeping video playing: ${postId}`);
+				}
+			} else {
+				console.log(`⚠️ No player found for: ${postId}`);
+			}
+		});
+	};
 
 	const getPosts = async () => {
 
@@ -90,6 +105,9 @@ const Home = () => {
 								image: userData?.image ?? undefined,
 							}}
 							router={router}
+							handlePauseAllVideos={handlePauseAllVideos}
+							videoPlayerRefs={videoPlayerRefs}
+							setVideoPlayerRefs={setVideoPlayerRefs}
 						/>}
 						windowSize={10} // Increases the number of visible items before unmounting
 						maxToRenderPerBatch={5} // Loads more items at once
@@ -159,4 +177,3 @@ const styles = StyleSheet.create({
 		fontWeight: theme.fonts.bold as TextStyle['fontWeight'],
 	}
 })
-

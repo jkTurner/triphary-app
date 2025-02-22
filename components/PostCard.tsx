@@ -30,7 +30,11 @@ interface PostCardProps {
 	item: Post;
 	currentUser: User;
 	router: ReturnType<typeof useRouter>;
+	handlePauseAllVideos: (currentId: string) => void;
+	videoPlayerRefs: { [key: string]: any };
+	setVideoPlayerRefs: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
 }
+
 
 const openPostDetail = () => {
 
@@ -57,6 +61,9 @@ const PostCard: React.FC<PostCardProps> = ({
 	item,
 	currentUser,
 	router,
+	handlePauseAllVideos,
+	videoPlayerRefs,
+	setVideoPlayerRefs,
 }) => {
 
 	console.log('post item: ', item);
@@ -77,6 +84,15 @@ const PostCard: React.FC<PostCardProps> = ({
 	const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
 	const [showVideo, setShowVideo] = useState(false);
 	// const [pukme, setPukme] = useState(true);
+
+	useEffect(() => {
+		if (isVideo && videoPlayer) {
+			setVideoPlayerRefs((prev) => ({
+				...prev,
+				[item.id]: videoPlayer,
+			}));
+		}
+	}, [videoPlayer]);
 
 	// setting image height
 	useEffect(() => {
@@ -102,8 +118,6 @@ const PostCard: React.FC<PostCardProps> = ({
 				.catch((error) => console.error("❌ Error getting video dimensions:", error));
 		}
 	}, [item?.media]); // ✅ Runs only when media changes
-
-
 
 	return (
 		<View style={[styles.container]}>
@@ -153,6 +167,7 @@ const PostCard: React.FC<PostCardProps> = ({
 					<TouchableOpacity
 						onPress={() => {
 							setShowVideo(true);
+							// handlePauseAllVideos(item.id);
 							videoPlayer?.play();
 						}}
 					>
@@ -169,11 +184,20 @@ const PostCard: React.FC<PostCardProps> = ({
 								</View>
 							</View>
 						) : (
-							<VideoView
-								player={videoPlayer}
-								style={[styles.postMedia, { height: videoHeight }]} // ✅ Uses calculated height
-								nativeControls
-							/>
+							<View>
+								<VideoView
+									player={videoPlayer}
+									style={[styles.postMedia, { height: videoHeight }]} // ✅ Uses calculated height
+									nativeControls
+								/>
+								<TouchableOpacity
+									onPress={() => handlePauseAllVideos(item.id)}
+									style={styles.pauseButton}
+								>
+									<Text style={styles.pauseButtonText}>Pause Other Videos</Text>
+								</TouchableOpacity>
+
+							</View>
 						)}
 					</TouchableOpacity>
 				)}
@@ -260,5 +284,18 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		backgroundColor: 'rgba(0, 0, 0, 0.4)',
 		borderRadius: hp(4),
-	}
+	},
+	pauseButton: {
+		position: 'absolute',
+		bottom: 10,
+		right: 10,
+		backgroundColor: 'rgba(0, 0, 0, 0.6)',
+		padding: 8,
+		borderRadius: 5,
+	},
+	pauseButtonText: {
+		color: 'white',
+		fontSize: hp(1.5),
+		fontWeight: 'bold',
+	},
 })
