@@ -5,7 +5,7 @@ import { theme } from '@/constants/theme';
 import { hp, wp } from '@/helpers/common';
 import Avatar from './Avatar';
 import moment from 'moment'
-import { ThreeDotsIcon } from '@/assets/icons/Icons';
+import { PlayIcon, ThreeDotsIcon } from '@/assets/icons/Icons';
 import RenderHtml from 'react-native-render-html';
 import { Image } from 'expo-image';
 import { getImageDimensions, getUserMediaSrc, getVideoThumbnailSize } from '@/services/imageService';
@@ -76,7 +76,7 @@ const PostCard: React.FC<PostCardProps> = ({
 	const [videoHeight, setVideoHeight] = useState(hp(40));
 	const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
 	const [showVideo, setShowVideo] = useState(false);
-	const [pukme, setPukme] = useState(true);
+	// const [pukme, setPukme] = useState(true);
 
 	// setting image height
 	useEffect(() => {
@@ -150,14 +150,24 @@ const PostCard: React.FC<PostCardProps> = ({
 
                 {/* Show Video if it's a Video */}
 				{isVideo && videoPlayer && (
-					<TouchableOpacity onPress={() => setShowVideo(true)}>
+					<TouchableOpacity
+						onPress={() => {
+							setShowVideo(true);
+							videoPlayer?.play();
+						}}
+					>
 						{!showVideo? (
-							<Image
-								source={{ uri: videoThumbnail ?? '' }}
-								transition={100}
-								style={[styles.postMedia, {height: videoHeight}]}
-								contentFit='cover'
-							/>
+							<View>
+								<Image
+									source={{ uri: videoThumbnail ?? '' }}
+									transition={100}
+									style={[styles.postMedia, {height: videoHeight}]}
+									contentFit='cover'
+								/>
+								<View style={styles.playIconContainer}>
+									<PlayIcon size={hp(6)} color="white" />
+								</View>
+							</View>
 						) : (
 							<VideoView
 								player={videoPlayer}
@@ -242,5 +252,13 @@ const styles = StyleSheet.create({
 	count: {
 		color: theme.colors.text,
 		fontSize: hp(1.8),
+	},
+	playIconContainer: {
+		position: 'absolute',
+		inset: 0, // makes the overlay cover the entire thumbnail
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: 'rgba(0, 0, 0, 0.4)',
+		borderRadius: hp(4),
 	}
 })
