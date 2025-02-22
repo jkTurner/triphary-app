@@ -74,7 +74,11 @@ const PostCard: React.FC<PostCardProps> = ({
 	const SUPABASE_STORAGE_URL = "https://byqasqcvwfgxerrysacf.supabase.co/storage/v1/object/public/uploads/";
 	const [imageHeight, setImageHeight] = useState(hp(40)); // Default height
 	const [videoHeight, setVideoHeight] = useState(hp(40));
+	const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
+	const [showVideo, setShowVideo] = useState(false);
+	const [pukme, setPukme] = useState(true);
 
+	// setting image height
 	useEffect(() => {
 		if(item?.media && isImage) {
 			getImageDimensions(item.media)
@@ -83,16 +87,23 @@ const PostCard: React.FC<PostCardProps> = ({
 		}
 	}, [item?.media])
 
+	// setting video height and thumbnail
 	useEffect(() => {
 		if (item?.media && isVideo) {
 			const videoUrl = `${SUPABASE_STORAGE_URL}${item.media}`;
-			console.log("🎬 Fetching video size for:", videoUrl);
+			console.log("🎥 Generating thumbnail for:", videoUrl);
 
 			getVideoThumbnailSize(videoUrl)
-				.then((calculatedHeight) => setVideoHeight(calculatedHeight))
-				.catch((error) => console.error("❌ Error getting video dimensions: ", error));
+				.then(({ uri, calculatedHeight }) => {
+					setVideoThumbnail(uri); // ✅ Save the thumbnail URI
+					setVideoHeight(calculatedHeight); // ✅ Save the adjusted video height
+					console.log(`✅ Video Height Set: ${calculatedHeight}`);
+				})
+				.catch((error) => console.error("❌ Error getting video dimensions:", error));
 		}
-	}, [item?.media]);
+	}, [item?.media]); // ✅ Runs only when media changes
+
+
 
 	return (
 		<View style={[styles.container]}>
@@ -139,11 +150,22 @@ const PostCard: React.FC<PostCardProps> = ({
 
                 {/* Show Video if it's a Video */}
 				{isVideo && videoPlayer && (
-					<VideoView
-						player={videoPlayer}
-						style={[styles.postMedia, { height: videoHeight }]} // ✅ Uses calculated height
-						nativeControls
-					/>
+					<TouchableOpacity onPress={() => setShowVideo(true)}>
+						{!showVideo? (
+							<Image
+								source={{ uri: videoThumbnail ?? '' }}
+								transition={100}
+								style={[styles.postMedia, {height: videoHeight}]}
+								contentFit='cover'
+							/>
+						) : (
+							<VideoView
+								player={videoPlayer}
+								style={[styles.postMedia, { height: videoHeight }]} // ✅ Uses calculated height
+								nativeControls
+							/>
+						)}
+					</TouchableOpacity>
 				)}
 
 			</View>

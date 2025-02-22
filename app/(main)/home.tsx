@@ -91,6 +91,9 @@ const Home = () => {
 							}}
 							router={router}
 						/>}
+						windowSize={10} // Increases the number of visible items before unmounting
+						maxToRenderPerBatch={5} // Loads more items at once
+						removeClippedSubviews={false} // Prevents aggressive unmounting
 				/>
 
 			</View>

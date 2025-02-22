@@ -36,13 +36,15 @@ export const getImageDimensions = (mediaPath: string): Promise<number> => {
 	})
 }
 
-export const getVideoThumbnailSize = async (videoUri: string): Promise<number> => {
+export const getVideoThumbnailSize = async (videoUri: string): Promise<{ uri: string; calculatedHeight: number }> => {
 	try {
+		// Generate a thumbnail from the video at 0.5s
 		const { uri } = await VideoThumbnails.getThumbnailAsync(videoUri, {
 			time: 500, // Take a frame at 0.5 seconds
 		});
 
-		return new Promise<number>((resolve, reject) => {
+		// Get the dimensions of the thumbnail
+		return new Promise<{ uri: string; calculatedHeight: number }>((resolve, reject) => {
 			RNImage.getSize(uri, (width, height) => {
 				console.log(`✅ Video Thumbnail size - Width: ${width}, Height: ${height}`);
 
@@ -50,7 +52,7 @@ export const getVideoThumbnailSize = async (videoUri: string): Promise<number> =
 				const calculatedHeight = wp(100) / aspectRatio; // Maintain full width
 
 				console.log(`🔄 Adjusted Video Height: ${calculatedHeight}`);
-				resolve(calculatedHeight);
+				resolve({ uri, calculatedHeight }); // ✅ Return both values
 			}, (error) => {
 				console.error("❌ Failed to get video thumbnail size: ", error);
 				reject(error);
@@ -61,8 +63,6 @@ export const getVideoThumbnailSize = async (videoUri: string): Promise<number> =
 		throw error;
 	}
 };
-
-
 
 // this function makes sure to return an object doesn't matter the type of image path
 export const getUserMediaSrc = (imagePath?: string | { uri: string } | null) => {
