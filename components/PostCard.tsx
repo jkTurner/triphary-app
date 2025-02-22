@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TextStyle, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, TextStyle, TouchableOpacity, View, Image as RNImage } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router';
 import { theme } from '@/constants/theme';
 import { hp, wp } from '@/helpers/common';
@@ -8,7 +8,7 @@ import moment from 'moment'
 import { ThreeDotsIcon } from '@/assets/icons/Icons';
 import RenderHtml from 'react-native-render-html';
 import { Image } from 'expo-image';
-import { getUserMediaSrc } from '@/services/imageService';
+import { getImageDimensions, getUserMediaSrc, getVideoThumbnailSize } from '@/services/imageService';
 import { useVideoPlayer, VideoView } from 'expo-video';
 
 interface Post {
@@ -71,6 +71,29 @@ const PostCard: React.FC<PostCardProps> = ({
 		player.volume = 1.0;
 	}) : null;
 
+	const SUPABASE_STORAGE_URL = "https://byqasqcvwfgxerrysacf.supabase.co/storage/v1/object/public/uploads/";
+	const [imageHeight, setImageHeight] = useState(hp(40)); // Default height
+	const [videoHeight, setVideoHeight] = useState(hp(40));
+
+	useEffect(() => {
+		if(item?.media && isImage) {
+			getImageDimensions(item.media)
+				.then((calculatedHeight) => setImageHeight(calculatedHeight))
+				.catch((error) => console.log("Image dimension fetch failed: ", error));
+		}
+	}, [item?.media])
+
+	useEffect(() => {
+		if (item?.media && isVideo) {
+			const videoUrl = `${SUPABASE_STORAGE_URL}${item.media}`;
+			console.log("🎬 Fetching video size for:", videoUrl);
+
+			getVideoThumbnailSize(videoUrl)
+				.then((calculatedHeight) => setVideoHeight(calculatedHeight))
+				.catch((error) => console.error("❌ Error getting video dimensions: ", error));
+		}
+	}, [item?.media]);
+
 	return (
 		<View style={[styles.container]}>
 			<View style={styles.header}>
@@ -107,7 +130,7 @@ const PostCard: React.FC<PostCardProps> = ({
 					<Image
 						source={getUserMediaSrc(item?.media)}
 						transition={100}
-						style={styles.postMedia}
+						style={[styles.postMedia, { height: imageHeight }]} // ✅ Uses calculated height
 						contentFit="cover"
 						onError={(error) => console.log('Image failed to load:', error)}
 					/>
@@ -118,7 +141,7 @@ const PostCard: React.FC<PostCardProps> = ({
 				{isVideo && videoPlayer && (
 					<VideoView
 						player={videoPlayer}
-						style={styles.postMedia}
+						style={[styles.postMedia, { height: videoHeight }]} // ✅ Uses calculated height
 						nativeControls
 					/>
 				)}

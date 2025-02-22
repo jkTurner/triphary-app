@@ -28,7 +28,7 @@ const MainLayout = () => {
 	const fetchAndUpdateUserData = async (user: User) => {
 		try {
 			const res = await getUserService(user.id);
-			console.log("🛠 Full user data (_layout):", res.data);
+			// console.log("🛠 Full user data (_layout):", res.data);
 			if (res.success) {
 				updateUserData(res.data);
 			} else {

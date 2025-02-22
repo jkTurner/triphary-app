@@ -38,7 +38,7 @@ const Home = () => {
 		limit = limit + 10;
 		let res = await fetchPost();
 
-		console.log('fetching post: ', limit);
+		// console.log('fetching post: ', limit);
 
 		if (res.success) {
 			setPosts(res.data ?? []);

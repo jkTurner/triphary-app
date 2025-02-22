@@ -38,7 +38,7 @@ const editProfile = () => {
 				address: userData?.address || '',
 				bio: userData?.bio || '',
 			})
-			console.log("🟡 Set user in useEffect.")
+			// console.log("🟡 Set user in useEffect.")
 		}
 	}, [currentUser, userData])
 
@@ -50,10 +50,10 @@ const editProfile = () => {
 			quality: 0.7,
 		});
 
-		console.log("🟡 Image Picker Result:", result); // ✅ Check what the user picked
+		// console.log("🟡 Image Picker Result:", result);
 
 		if (!result.canceled) {
-			console.log("✅ Selected Image URI:", result.assets[0].uri);
+			// console.log("✅ Selected Image URI:", result.assets[0].uri);
 			setUser((prev) => ({ ...prev, image: result.assets[0].uri }));
 		}
 	};
@@ -88,7 +88,7 @@ const editProfile = () => {
 
 			// get new image url from supabase
 			imageUrl = uploadResult.data ?? null; // we will use this to set new profile pic right the way
-			console.log("🟢 Image URL from Supabase: ", imageUrl);
+			// console.log("🟢 Image URL from Supabase: ", imageUrl);
 		}
 
 		const updatedUserData = {
@@ -96,12 +96,12 @@ const editProfile = () => {
 			image: imageUrl,
 		};
 
-		console.log("🟡 Updated User Profile:", updatedUserData);
+		// console.log("🟡 Updated User Profile:", updatedUserData);
 
 		const res = await updateUserService(currentUser.id, updatedUserData);
 		setLoading(false);
 
-		console.log("🟡 Supabase update response:", res); // check if the server responds correctly
+		// console.log("🟡 Supabase update response:", res);
 
 		if (res.success) {
 			updateUserData(updatedUserData); // make sure the profile page has the updated data right away

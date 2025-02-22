@@ -1,8 +1,72 @@
 import { supabaseUrl } from "@/constants";
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer'
+import { supabase } from '@/lib/supabase';
+import { hp, wp } from "@/helpers/common";
+import { Image as RNImage } from 'react-native';
+import * as VideoThumbnails from 'expo-video-thumbnails'
+
+const SUPABASE_STORAGE_URL = "https://byqasqcvwfgxerrysacf.supabase.co/storage/v1/object/public/uploads/";
+
+export const getImageDimensions = (mediaPath: string): Promise<number> => {
+	return new Promise((resolve, reject) => {
+		if (!mediaPath) {
+			reject("Invalid image path");
+			return;
+		}
+
+		const mediaUrl = `${SUPABASE_STORAGE_URL}${mediaPath}`;
+		console.log("Fetching media size for: ", mediaUrl);
+
+		RNImage.getSize(
+			mediaUrl,
+			(width, height) => {
+				console.log(`Media size - Width: ${width}, Height: ${height}`);
+				const aspectRatio = width / height;
+				const calculatedHeight = wp(100) / aspectRatio; // we maintain full width
+
+				console.log(`Adjusted Height: ${calculatedHeight}`);
+				resolve(calculatedHeight);
+			},
+			(error) => {
+				console.log("Failed to get media size: ", error);
+				reject(error);
+			}
+		)
+	})
+}
+
+export const getVideoThumbnailSize = async (videoUri: string): Promise<number> => {
+	try {
+		const { uri } = await VideoThumbnails.getThumbnailAsync(videoUri, {
+			time: 500, // Take a frame at 0.5 seconds
+		});
+
+		return new Promise<number>((resolve, reject) => {
+			RNImage.getSize(uri, (width, height) => {
+				console.log(`✅ Video Thumbnail size - Width: ${width}, Height: ${height}`);
+
+				const aspectRatio = Number(width) / Number(height);
+				const calculatedHeight = wp(100) / aspectRatio; // Maintain full width
+
+				console.log(`🔄 Adjusted Video Height: ${calculatedHeight}`);
+				resolve(calculatedHeight);
+			}, (error) => {
+				console.error("❌ Failed to get video thumbnail size: ", error);
+				reject(error);
+			});
+		});
+	} catch (error) {
+		console.error("❌ Failed to generate video thumbnail: ", error);
+		throw error;
+	}
+};
+
+
 
 // this function makes sure to return an object doesn't matter the type of image path
 export const getUserMediaSrc = (imagePath?: string | { uri: string } | null) => {
-    console.log("▶️ getUserMediaSrc called with:", imagePath);
+    // console.log("▶️ getUserMediaSrc called with:", imagePath);
 
     if (!imagePath) {
         console.log("▶️ (getUserMediaSrc) Returning default image");
@@ -20,7 +84,7 @@ export const getUserMediaSrc = (imagePath?: string | { uri: string } | null) => 
             return { uri: imagePath };
         }
 
-        console.log("▶️ (getUserMediaSrc) Assuming Supabase URL:", getSupabaseFileUrl(imagePath));
+        // console.log("▶️ (getUserMediaSrc) Assuming Supabase URL:", getSupabaseFileUrl(imagePath));
         return getSupabaseFileUrl(imagePath);
     }
 
@@ -41,10 +105,6 @@ export const getSupabaseFileUrl = (filePath: string) => {
 	}
 	return null;
 }
-
-import * as FileSystem from 'expo-file-system';
-import { decode } from 'base64-arraybuffer'
-import { supabase } from '@/lib/supabase';
 
 export const uploadFile = async (folderName: string, fileUri: string, isImage = true) => {
 	try {
