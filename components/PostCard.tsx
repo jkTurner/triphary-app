@@ -10,6 +10,7 @@ import RenderHtml from 'react-native-render-html';
 import { Image } from 'expo-image';
 import { getImageDimensions, getUserMediaSrc, getVideoThumbnailSize } from '@/services/imageService';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import { useEvent } from 'expo';
 
 interface Post {
 	id: string;
@@ -35,10 +36,7 @@ interface PostCardProps {
 	setVideoPlayerRefs: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
 }
 
-
-const openPostDetail = () => {
-
-}
+const openPostDetail = () => {}
 
 const textStyle = {
 	color: theme.colors.dark,
@@ -83,7 +81,6 @@ const PostCard: React.FC<PostCardProps> = ({
 	const [videoHeight, setVideoHeight] = useState(hp(40));
 	const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
 	const [showVideo, setShowVideo] = useState(false);
-	// const [pukme, setPukme] = useState(true);
 
 	useEffect(() => {
 		if (isVideo && videoPlayer) {
@@ -94,7 +91,25 @@ const PostCard: React.FC<PostCardProps> = ({
 		}
 	}, [videoPlayer]);
 
-	// setting image height
+	// ✅ Use `useEvent` to track playing state
+	const event = videoPlayer
+		? useEvent(videoPlayer, 'playingChange', { isPlaying: videoPlayer.playing })
+		: { isPlaying: false };
+
+	const isPlaying = event.isPlaying;
+
+	// ✅ Automatically pause other videos when one starts playing
+	useEffect(() => {
+		if (isPlaying) {
+		console.log(`🎥 Video ID: ${item.id} started playing`);
+		handlePauseAllVideos(item.id);
+		}
+	}, [isPlaying]);
+
+
+
+
+
 	useEffect(() => {
 		if(item?.media && isImage) {
 			getImageDimensions(item.media)
@@ -103,7 +118,6 @@ const PostCard: React.FC<PostCardProps> = ({
 		}
 	}, [item?.media])
 
-	// setting video height and thumbnail
 	useEffect(() => {
 		if (item?.media && isVideo) {
 			const videoUrl = `${SUPABASE_STORAGE_URL}${item.media}`;
@@ -111,22 +125,19 @@ const PostCard: React.FC<PostCardProps> = ({
 
 			getVideoThumbnailSize(videoUrl)
 				.then(({ uri, calculatedHeight }) => {
-					setVideoThumbnail(uri); // ✅ Save the thumbnail URI
-					setVideoHeight(calculatedHeight); // ✅ Save the adjusted video height
+					setVideoThumbnail(uri);
+					setVideoHeight(calculatedHeight);
 					console.log(`✅ Video Height Set: ${calculatedHeight}`);
 				})
 				.catch((error) => console.error("❌ Error getting video dimensions:", error));
 		}
-	}, [item?.media]); // ✅ Runs only when media changes
+	}, [item?.media]);
 
 	return (
 		<View style={[styles.container]}>
 			<View style={styles.header}>
 				<View style={styles.userInfo}>
-					<Avatar
-						size={hp(4.5)}
-						uri={item?.user?.image}
-					/>
+					<Avatar size={hp(4.5)} uri={item?.user?.image} />
 					<View style={{gap: 2}}>
 						<Text style={styles.username}>{item?.user?.name}</Text>
 						<Text style={styles.postTime}>{createdAt}</Text>
@@ -139,76 +150,42 @@ const PostCard: React.FC<PostCardProps> = ({
 
 			<View style={styles.content}>
 				<View style={styles.postBody}>
-					{
-						item?.body && (
-							<RenderHtml
-								contentWidth={wp(100)}
-								source={{ html: item?.body ?? '<p>No content available</p>' }}
-								tagsStyles={tagsStyles}
-							/>
-						)
-					}
+					{item?.body && (
+						<RenderHtml
+							contentWidth={wp(100)}
+							source={{ html: item?.body ?? '<p>No content available</p>' }}
+							tagsStyles={tagsStyles}
+						/>
+					)}
 				</View>
 
-                {/* Show Image if it's an Image */}
 				{isImage && (
-					<Image
-						source={getUserMediaSrc(item?.media)}
-						transition={100}
-						style={[styles.postMedia, { height: imageHeight }]} // ✅ Uses calculated height
-						contentFit="cover"
-						onError={(error) => console.log('Image failed to load:', error)}
-					/>
+					<Image source={getUserMediaSrc(item?.media)} transition={100} style={[styles.postMedia, { height: imageHeight }]} contentFit="cover" onError={(error) => console.log('Image failed to load:', error)} />
 				)}
 
-
-                {/* Show Video if it's a Video */}
 				{isVideo && videoPlayer && (
-					<TouchableOpacity
-						onPress={() => {
-							setShowVideo(true);
-							// handlePauseAllVideos(item.id);
-							videoPlayer?.play();
-						}}
-					>
-						{!showVideo? (
+					<TouchableOpacity onPress={() => {
+						setShowVideo(true);
+						videoPlayer?.play();
+					}}>
+						{!showVideo ? (
 							<View>
-								<Image
-									source={{ uri: videoThumbnail ?? '' }}
-									transition={100}
-									style={[styles.postMedia, {height: videoHeight}]}
-									contentFit='cover'
-								/>
+								<Image source={{ uri: videoThumbnail ?? '' }} transition={100} style={[styles.postMedia, { height: videoHeight }]} contentFit='cover' />
 								<View style={styles.playIconContainer}>
 									<PlayIcon size={hp(6)} color="white" />
 								</View>
 							</View>
 						) : (
-							<View>
-								<VideoView
-									player={videoPlayer}
-									style={[styles.postMedia, { height: videoHeight }]} // ✅ Uses calculated height
-									nativeControls
-								/>
-								<TouchableOpacity
-									onPress={() => handlePauseAllVideos(item.id)}
-									style={styles.pauseButton}
-								>
-									<Text style={styles.pauseButtonText}>Pause Other Videos</Text>
-								</TouchableOpacity>
-
-							</View>
+							<VideoView player={videoPlayer} style={[styles.postMedia, { height: videoHeight }]} nativeControls />
 						)}
 					</TouchableOpacity>
 				)}
-
 			</View>
-
 		</View>
-	)
+	);
 }
 
-export default PostCard
+export default PostCard;
 
 const styles = StyleSheet.create({
 	container: {
