@@ -5,7 +5,7 @@ import { theme } from '@/constants/theme';
 import { hp, wp } from '@/helpers/common';
 import Avatar from './Avatar';
 import moment from 'moment'
-import { PlayIcon, ThreeDotsIcon } from '@/assets/icons/Icons';
+import { CommentIcon, HeartIcon, HeartIconFilled, PlayIcon, ShareIcon, ThreeDotsIcon } from '@/assets/icons/Icons';
 import RenderHtml from 'react-native-render-html';
 import { Image } from 'expo-image';
 import { getImageDimensions, getUserMediaSrc, getVideoThumbnailSize } from '@/services/imageService';
@@ -64,7 +64,7 @@ const PostCard: React.FC<PostCardProps> = ({
 	setVideoPlayerRefs,
 }) => {
 
-	console.log('post item: ', item);
+	// console.log('post item: ', item);
 
 	const createdAt = moment(item?.created_at).format('MMM D');
 	const isImage = item?.media && /\.(jpg|jpeg|png|gif|webp)$/i.test(item.media);
@@ -81,6 +81,8 @@ const PostCard: React.FC<PostCardProps> = ({
 	const [videoHeight, setVideoHeight] = useState(hp(40));
 	const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
 	const [showVideo, setShowVideo] = useState(false);
+	const [liked, setLiked] = useState(true);
+	const likes = [];
 
 	useEffect(() => {
 		if (isVideo && videoPlayer) {
@@ -105,10 +107,6 @@ const PostCard: React.FC<PostCardProps> = ({
 		handlePauseAllVideos(item.id);
 		}
 	}, [isPlaying]);
-
-
-
-
 
 	useEffect(() => {
 		if(item?.media && isImage) {
@@ -180,6 +178,36 @@ const PostCard: React.FC<PostCardProps> = ({
 						)}
 					</TouchableOpacity>
 				)}
+			</View>
+			<View style={styles.footer}>
+				{/* likes */}
+				<View style={styles.footerButton}>
+					<TouchableOpacity>
+						<HeartIcon size={24} fill={liked? theme.colors.rose : "none"} color={liked? theme.colors.rose : theme.colors.textLight} />
+					</TouchableOpacity>
+					<Text style={styles.count}>
+						{
+							likes?.length
+						}
+					</Text>
+				</View>
+				{/* comments */}
+				<View style={styles.footerButton}>
+					<TouchableOpacity>
+						<CommentIcon size={24} strokeWidth={1} color={theme.colors.textLight} />
+					</TouchableOpacity>
+					<Text style={styles.count}>
+						{
+							likes?.length
+						}
+					</Text>
+				</View>
+				{/* share */}
+				<View style={styles.footerButton}>
+					<TouchableOpacity>
+						<ShareIcon size={24} color={theme.colors.textLight} />
+					</TouchableOpacity>
+				</View>
 			</View>
 		</View>
 	);

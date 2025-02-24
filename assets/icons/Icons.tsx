@@ -8,6 +8,7 @@ const defaultProps = {
 	strokeWidth: 1.5,
 	color: "#5C5C5C",
 	size: 24,
+	fill: "none",
 }
 
 export const UserIcon = (props: CustomSvgProps) => {
@@ -396,13 +397,101 @@ export const PlayIcon = (props: CustomSvgProps) => {
 	const { strokeWidth, color, size, ...otherProps } = { ...defaultProps, ...props }
 	return (
 		<Svg viewBox="0 0 24 24" width={size} height={size} color={color} fill="none">
-			<Circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width={strokeWidth} />
+			<Circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={strokeWidth} />
 			<Path d="M15.9453 12.3948C15.7686 13.0215 14.9333 13.4644 13.2629 14.3502C11.648 15.2064 10.8406 15.6346 10.1899 15.4625C9.9209 15.3913 9.6758 15.2562 9.47812 15.0701C9 14.6198 9 13.7465 9 12C9 10.2535 9 9.38018 9.47812 8.92995C9.6758 8.74381 9.9209 8.60868 10.1899 8.53753C10.8406 8.36544 11.648 8.79357 13.2629 9.64983C14.9333 10.5356 15.7686 10.9785 15.9453 11.6052C16.0182 11.8639 16.0182 12.1361 15.9453 12.3948Z"
 				stroke={color}
-				stroke-width={size}
+				strokeWidth={size}
 				stroke-linejoin="round"
 			/>
 		</Svg>
 
 	)
 }
+
+// export const HeartIcon = (props: CustomSvgProps) => {
+
+// 	const { strokeWidth, color, size, ...otherProps } = { ...defaultProps, ...props }
+// 	return (
+// 		<Svg viewBox="0 0 24 24" width={size} height={size} color={color} fill="none">
+// 			<Path d="M19.4626 3.99415C16.7809 2.34923 14.4404 3.01211 13.0344 4.06801C12.4578 4.50096 12.1696 4.71743 12 4.71743C11.8304 4.71743 11.5422 4.50096 10.9656 4.06801C9.55962 3.01211 7.21909 2.34923 4.53744 3.99415C1.01807 6.15294 0.221721 13.2749 8.33953 19.2834C9.88572 20.4278 10.6588 21 12 21C13.3412 21 14.1143 20.4278 15.6605 19.2834C23.7783 13.2749 22.9819 6.15294 19.4626 3.99415Z"
+// 				stroke={color}
+// 				strokeWidth={strokeWidth}
+// 				stroke-linecap="round"
+// 			/>
+// 		</Svg>
+// 	)
+// }
+
+export const CommentIcon = (props: CustomSvgProps) => {
+
+	const { strokeWidth, color, size, ...otherProps } = { ...defaultProps, ...props }
+	return (
+		<Svg viewBox="0 0 24 24" width={size} height={size} color={color} fill="none">
+			<Path d="M14.1706 20.8905C18.3536 20.6125 21.6856 17.2332 21.9598 12.9909C22.0134 12.1607 22.0134 11.3009 21.9598 10.4707C21.6856 6.22838 18.3536 2.84913 14.1706 2.57107C12.7435 2.47621 11.2536 2.47641 9.8294 2.57107C5.64639 2.84913 2.31441 6.22838 2.04024 10.4707C1.98659 11.3009 1.98659 12.1607 2.04024 12.9909C2.1401 14.536 2.82343 15.9666 3.62791 17.1746C4.09501 18.0203 3.78674 19.0758 3.30021 19.9978C2.94941 20.6626 2.77401 20.995 2.91484 21.2351C3.05568 21.4752 3.37026 21.4829 3.99943 21.4982C5.24367 21.5285 6.08268 21.1757 6.74868 20.6846C7.1264 20.4061 7.31527 20.2668 7.44544 20.2508C7.5756 20.2348 7.83177 20.3403 8.34401 20.5513C8.8044 20.7409 9.33896 20.8579 9.8294 20.8905C11.2536 20.9852 12.7435 20.9854 14.1706 20.8905Z"
+				stroke={color}
+				strokeWidth={strokeWidth}
+				stroke-linejoin="round"
+			/>
+			{/* <Path d="M11.9953 12H12.0043M15.9908 12H15.9998M7.99982 12H8.00879"
+				stroke={color}
+				strokeWidth={strokeWidth}
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/> */}
+			<Circle cx="8" cy="12" r="1" fill={color} />
+			<Circle cx="12" cy="12" r="1" fill={color} />
+			<Circle cx="16" cy="12" r="1" fill={color} />
+		</Svg>
+	)
+}
+
+export const ShareIcon = (props: CustomSvgProps) => {
+
+	const { strokeWidth, color, size, ...otherProps } = { ...defaultProps, ...props }
+	return (
+		<Svg viewBox="0 0 24 24" width={size} height={size} color={color} fill="none">
+			<Path d="M18 7C18.7745 7.16058 19.3588 7.42859 19.8284 7.87589C21 8.99181 21 10.7879 21 14.38C21 17.9721 21 19.7681 19.8284 20.8841C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8841C3 19.7681 3 17.9721 3 14.38C3 10.7879 3 8.99181 4.17157 7.87589C4.64118 7.42859 5.2255 7.16058 6 7"
+				stroke={color}
+				stroke-width={size}
+				stroke-linecap="round"
+			/>
+			<Path d="M12.0253 2.00052L12 14M12.0253 2.00052C11.8627 1.99379 11.6991 2.05191 11.5533 2.17492C10.6469 2.94006 9 4.92886 9 4.92886M12.0253 2.00052C12.1711 2.00657 12.3162 2.06476 12.4468 2.17508C13.3531 2.94037 15 4.92886 15 4.92886"
+				stroke={color}
+				stroke-width={size}
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+		</Svg>
+	)
+}
+
+export const HeartIcon = (props: CustomSvgProps) => {
+	const { strokeWidth, color, size, fill, ...otherProps } = { ...defaultProps, ...props };
+	return (
+		<Svg viewBox="0 0 24 24" width={size} height={size} color={color} fill={fill}>
+			<Path
+				d="M16.5 3.5C14.8 3.5 13.3 4.4 12.5 5.6C11.7 4.4 10.2 3.5 8.5 3.5C5.4 3.5 3 6.1 3 9C3 13.5 7.5 17 12 21C16.5 17 21 13.5 21 9C21 6.1 18.6 3.5 16.5 3.5Z"
+				stroke={color}
+				stroke-width={strokeWidth}
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+		</Svg>
+	);
+};
+
+export const HeartIconFilled = (props: CustomSvgProps) => {
+	const { strokeWidth, color, size, ...otherProps } = { ...defaultProps, ...props };
+	return (
+		<Svg viewBox="0 0 24 24" width={size} height={size} color={color} fill={color}>
+			<Path
+				d="M16.5 3.5C14.8 3.5 13.3 4.4 12.5 5.6C11.7 4.4 10.2 3.5 8.5 3.5C5.4 3.5 3 6.1 3 9C3 13.5 7.5 17 12 21C16.5 17 21 13.5 21 9C21 6.1 18.6 3.5 16.5 3.5Z"
+				fill={color}
+				stroke={color}
+				stroke-width={strokeWidth}
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+		</Svg>
+	);
+};

@@ -10,6 +10,9 @@ import { useRouter } from 'expo-router'
 import Avatar from '@/components/Avatar'
 import { fetchPost } from '@/services/postService'
 import PostCard from '@/components/PostCard'
+import Loading from '@/components/Loading'
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import { getUserService } from '@/services/userService'
 
 interface Post {
 	id: string;
@@ -36,7 +39,7 @@ const Home = () => {
 
 		Object.entries(videoPlayerRefs).forEach(([postId, player]) => {
 			if (player) {
-				if (`${postId}` !== `${currentId}`) { // ✅ Ensure both are strings
+				if (`${postId}` !== `${currentId}`) { // ensure both are strings
 					console.log(`⏸ Pausing video with ID: ${postId}`);
 					player.pause();
 				} else {
@@ -50,18 +53,36 @@ const Home = () => {
 
 	const getPosts = async () => {
 
-		limit = limit + 10;
-		let res = await fetchPost();
+		limit = limit + 5;
 
-		// console.log('fetching post: ', limit);
-
+		console.log('fetching post: ', limit);
+		let res = await fetchPost(limit);
 		if (res.success) {
 			setPosts(res.data ?? []);
 		}
 	}
 
+	const handlePostEvent = async (payload: RealtimePostgresChangesPayload<any>) => {
+		if (payload.eventType == 'INSERT' && payload?.new?.id) {
+			const newPost = { ...payload.new };
+			const res = await getUserService(newPost.userId);
+			newPost.user = res.success? res.data: {};
+			setPosts(prevPosts => [newPost, ...prevPosts]);
+		}
+	}
+
 	useEffect(() => {
-		getPosts();
+
+		const postChannel = supabase
+		.channel('posts')
+		.on('postgres_changes', {event: '*', schema: 'public', table: 'posts'}, handlePostEvent)
+		.subscribe();
+
+		// getPosts();
+
+		return () => {
+			supabase.removeChannel(postChannel);
+		}
 	}, [])
 
 	return (
@@ -108,10 +129,20 @@ const Home = () => {
 							handlePauseAllVideos={handlePauseAllVideos}
 							videoPlayerRefs={videoPlayerRefs}
 							setVideoPlayerRefs={setVideoPlayerRefs}
-						/>}
-						windowSize={10} // Increases the number of visible items before unmounting
-						maxToRenderPerBatch={5} // Loads more items at once
-						removeClippedSubviews={false} // Prevents aggressive unmounting
+					/>}
+					ListFooterComponent={
+						<View style={{marginTop: posts.length == 0 ? hp(35) : 15, marginBottom: posts.length == 0 ? hp(35) : 30}}>
+							<Loading />
+						</View>
+					}
+					onEndReached={() => {
+						getPosts();
+						console.log('got to the end');
+					}}
+					onEndReachedThreshold={0}
+					windowSize={10} // Increases the number of visible items before unmounting
+					maxToRenderPerBatch={5} // Loads more items at once
+					removeClippedSubviews={false} // Prevents aggressive unmounting
 				/>
 
 			</View>
