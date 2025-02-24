@@ -32,6 +32,7 @@ const Home = () => {
 	const {user, userData, setUserState} = useAuth();
 	const router = useRouter();
 	const [posts, setPosts] = useState<Post[]>([]);
+	const [hasMore, setHasMore] = useState(true);
 	const [videoPlayerRefs, setVideoPlayerRefs] = useState<{ [key: string]: any }>({});
 
 	const handlePauseAllVideos = (currentId: string | number) => {
@@ -53,11 +54,13 @@ const Home = () => {
 
 	const getPosts = async () => {
 
+		if (!hasMore) return null;
 		limit = limit + 5;
 
 		console.log('fetching post: ', limit);
 		let res = await fetchPost(limit);
 		if (res.success) {
+			if (posts.length == res.data?.length) setHasMore(false);
 			setPosts(res.data ?? []);
 		}
 	}
@@ -130,10 +133,15 @@ const Home = () => {
 							videoPlayerRefs={videoPlayerRefs}
 							setVideoPlayerRefs={setVideoPlayerRefs}
 					/>}
-					ListFooterComponent={
+					ListFooterComponent={hasMore? (
 						<View style={{marginTop: posts.length == 0 ? hp(35) : 15, marginBottom: posts.length == 0 ? hp(35) : 30}}>
 							<Loading />
 						</View>
+					) : (
+						<View style={{marginTop: posts.length == 0 ? hp(35) : 15, marginBottom: posts.length == 0 ? hp(35) : 30}}>
+							<Text style={styles.noPosts}>No more posts...</Text>
+						</View>
+					)
 					}
 					onEndReached={() => {
 						getPosts();
@@ -187,9 +195,9 @@ const styles = StyleSheet.create({
 		paddingHorizontal: wp(4),
 	},
 	noPosts: {
-		fontSize: hp(2),
+		fontSize: hp(1.8),
 		textAlign: 'center',
-		color: theme.colors.text,
+		color: theme.colors.textLight,
 	},
 	pill: {
 		position: 'absolute',

@@ -119,13 +119,13 @@ const PostCard: React.FC<PostCardProps> = ({
 	useEffect(() => {
 		if (item?.media && isVideo) {
 			const videoUrl = `${SUPABASE_STORAGE_URL}${item.media}`;
-			console.log("🎥 Generating thumbnail for:", videoUrl);
+			// console.log("🎥 Generating thumbnail for:", videoUrl);
 
 			getVideoThumbnailSize(videoUrl)
 				.then(({ uri, calculatedHeight }) => {
 					setVideoThumbnail(uri);
 					setVideoHeight(calculatedHeight);
-					console.log(`✅ Video Height Set: ${calculatedHeight}`);
+					// console.log(`✅ Video Height Set: ${calculatedHeight}`);
 				})
 				.catch((error) => console.error("❌ Error getting video dimensions:", error));
 		}

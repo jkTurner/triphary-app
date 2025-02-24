@@ -16,16 +16,16 @@ export const getImageDimensions = (mediaPath: string): Promise<number> => {
 		}
 
 		const mediaUrl = `${SUPABASE_STORAGE_URL}${mediaPath}`;
-		console.log("Fetching media size for: ", mediaUrl);
+		// console.log("Fetching media size for: ", mediaUrl);
 
 		RNImage.getSize(
 			mediaUrl,
 			(width, height) => {
-				console.log(`Media size - Width: ${width}, Height: ${height}`);
+				// console.log(`Media size - Width: ${width}, Height: ${height}`);
 				const aspectRatio = width / height;
 				const calculatedHeight = wp(100) / aspectRatio; // we maintain full width
 
-				console.log(`Adjusted Height: ${calculatedHeight}`);
+				// console.log(`Adjusted Height: ${calculatedHeight}`);
 				resolve(calculatedHeight);
 			},
 			(error) => {
@@ -46,12 +46,12 @@ export const getVideoThumbnailSize = async (videoUri: string): Promise<{ uri: st
 		// Get the dimensions of the thumbnail
 		return new Promise<{ uri: string; calculatedHeight: number }>((resolve, reject) => {
 			RNImage.getSize(uri, (width, height) => {
-				console.log(`✅ Video Thumbnail size - Width: ${width}, Height: ${height}`);
+				// console.log(`✅ Video Thumbnail size - Width: ${width}, Height: ${height}`);
 
 				const aspectRatio = Number(width) / Number(height);
 				const calculatedHeight = wp(100) / aspectRatio; // Maintain full width
 
-				console.log(`🔄 Adjusted Video Height: ${calculatedHeight}`);
+				// console.log(`🔄 Adjusted Video Height: ${calculatedHeight}`);
 				resolve({ uri, calculatedHeight }); // ✅ Return both values
 			}, (error) => {
 				console.error("❌ Failed to get video thumbnail size: ", error);
