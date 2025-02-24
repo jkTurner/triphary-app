@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextStyle, TouchableOpacity, View, Image as RNImage } from 'react-native'
+import { StyleSheet, Text, TextStyle, TouchableOpacity, View, Image as RNImage, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router';
 import { theme } from '@/constants/theme';
@@ -11,6 +11,8 @@ import { Image } from 'expo-image';
 import { getImageDimensions, getUserMediaSrc, getVideoThumbnailSize } from '@/services/imageService';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEvent } from 'expo';
+import { createPostLike, removePostLike } from '@/services/postService';
+import { PostLikesType } from '@/types/types';
 
 interface Post {
 	id: string;
@@ -19,6 +21,7 @@ interface Post {
 	user: User;
 	body?: string;
 	media?: string;
+	postLikes?: PostLikesType[];
 }
 
 interface User {
@@ -81,11 +84,37 @@ const PostCard: React.FC<PostCardProps> = ({
 	const [videoHeight, setVideoHeight] = useState(hp(40));
 	const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
 	const [showVideo, setShowVideo] = useState(false);
-	const [liked, setLiked] = useState(true);
-	const likes = [];
+	// const [liked, setLiked] = useState(false);
+	const [likes, setLikes] = useState<PostLikesType[]>([]);
+	const liked = likes.filter(like => like.userId == currentUser?.id) [0] ? true : false;
+	// const likes = [];
+
+	useEffect(() => {
+		setLikes(item?.postLikes || []);
+	}, [item?.postLikes])
 
 	const onLike = async () => {
 		console.log("onLike fires");
+		if (liked) {
+			let updatedLikes = likes.filter(like => like.userId!=currentUser?.id);
+			setLikes([...updatedLikes]);
+			let res = await removePostLike(item?.id, currentUser?.id);
+			console.log('removed like: ', res);
+			if(!res.success){
+				Alert.alert('Post', 'Something went wrong!');
+			}
+		} else {
+			let data = {
+				userId: currentUser?.id,
+				postId: item?.id
+			}
+			setLikes([...likes, data]);
+			let res = await createPostLike(data);
+			console.log('res: ', res);
+			if (!res.success) {
+				Alert.alert('Post', 'Something went wrong!');
+			}
+		}
 	}
 
 	useEffect(() => {
@@ -200,11 +229,11 @@ const PostCard: React.FC<PostCardProps> = ({
 					<TouchableOpacity>
 						<CommentIcon size={24} strokeWidth={1} color={theme.colors.textLight} />
 					</TouchableOpacity>
-					<Text style={styles.count}>
+					{/* <Text style={styles.count}>
 						{
 							likes?.length
 						}
-					</Text>
+					</Text> */}
 				</View>
 				{/* share */}
 				<View style={styles.footerButton}>
