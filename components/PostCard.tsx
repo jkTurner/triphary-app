@@ -84,6 +84,10 @@ const PostCard: React.FC<PostCardProps> = ({
 	const [liked, setLiked] = useState(true);
 	const likes = [];
 
+	const onLike = async () => {
+		console.log("onLike fires");
+	}
+
 	useEffect(() => {
 		if (isVideo && videoPlayer) {
 			setVideoPlayerRefs((prev) => ({
@@ -182,7 +186,7 @@ const PostCard: React.FC<PostCardProps> = ({
 			<View style={styles.footer}>
 				{/* likes */}
 				<View style={styles.footerButton}>
-					<TouchableOpacity>
+					<TouchableOpacity onPress={onLike}>
 						<HeartIcon size={24} fill={liked? theme.colors.rose : "none"} color={liked? theme.colors.rose : theme.colors.textLight} />
 					</TouchableOpacity>
 					<Text style={styles.count}>

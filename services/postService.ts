@@ -66,3 +66,23 @@ export const fetchPost = async (limit=10) => {
 	}
 
 };
+
+export const createPostLike = async (postLike) => {
+	try {
+		const {data, error} = await supabase
+		.from('postLikes')
+		.insert(postLike)
+		.select()
+		.single();
+
+		if (error) {
+			console.log('postLike error: ', error);
+			return { success: false, msg: 'Could not like the post' };
+		}
+
+		return { success: true, data: data };
+	} catch (error) {
+		console.log('postLike error: ', error);
+		return { success: false, msg: 'Could not like the post' };
+	}
+}

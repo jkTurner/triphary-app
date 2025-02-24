@@ -25,14 +25,14 @@ interface Post {
 	}
 }
 
-var limit = 0;
-
 const Home = () => {
 
 	const {user, userData, setUserState} = useAuth();
 	const router = useRouter();
 	const [posts, setPosts] = useState<Post[]>([]);
+	const [limit, setLimit] = useState(5);
 	const [hasMore, setHasMore] = useState(true);
+	const [isFetching, setIsFetching] = useState(false);
 	const [videoPlayerRefs, setVideoPlayerRefs] = useState<{ [key: string]: any }>({});
 
 	const handlePauseAllVideos = (currentId: string | number) => {
@@ -54,15 +54,19 @@ const Home = () => {
 
 	const getPosts = async () => {
 
-		if (!hasMore) return null;
-		limit = limit + 5;
+		if (!hasMore || isFetching) return;
 
-		console.log('fetching post: ', limit);
+		setIsFetching(true);
+		console.log('fetching post with limit: ', limit);
 		let res = await fetchPost(limit);
+
 		if (res.success) {
 			if (posts.length == res.data?.length) setHasMore(false);
 			setPosts(res.data ?? []);
+			setLimit(prev => prev + 5);
 		}
+
+		setIsFetching(false);
 	}
 
 	const handlePostEvent = async (payload: RealtimePostgresChangesPayload<any>) => {
@@ -133,21 +137,16 @@ const Home = () => {
 							videoPlayerRefs={videoPlayerRefs}
 							setVideoPlayerRefs={setVideoPlayerRefs}
 					/>}
-					ListFooterComponent={hasMore? (
-						<View style={{marginTop: posts.length == 0 ? hp(35) : 15, marginBottom: posts.length == 0 ? hp(35) : 30}}>
-							<Loading />
+					ListFooterComponent={() => (
+						<View style={{ marginTop: posts.length === 0 ? hp(35) : 15, marginBottom: posts.length === 0 ? hp(35) : 30 }}>
+							{hasMore ? <Loading /> : <Text style={styles.noPosts}>No more posts...</Text>}
 						</View>
-					) : (
-						<View style={{marginTop: posts.length == 0 ? hp(35) : 15, marginBottom: posts.length == 0 ? hp(35) : 30}}>
-							<Text style={styles.noPosts}>No more posts...</Text>
-						</View>
-					)
-					}
+					)}
 					onEndReached={() => {
 						getPosts();
 						console.log('got to the end');
 					}}
-					onEndReachedThreshold={0}
+					onEndReachedThreshold={0.5}
 					windowSize={10} // Increases the number of visible items before unmounting
 					maxToRenderPerBatch={5} // Loads more items at once
 					removeClippedSubviews={false} // Prevents aggressive unmounting
