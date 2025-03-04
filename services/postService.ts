@@ -41,7 +41,7 @@ export const createOrUpdatePost = async (post: PostData) => {
 	}
 };
 
-export const fetchPost = async (limit=10) => {
+export const fetchPost = async (limit = 5, offset = 0) => {
 
 	try {
 		const {data, error} = await supabase
@@ -52,18 +52,18 @@ export const fetchPost = async (limit=10) => {
 			postLikes (*)
 			`)
 		.order('created_at', {ascending: false})
-		.limit(limit);
+		.range(offset, offset + limit - 1);
 
 		if(error) {
 			console.log('fetchPosts error: ', error);
-			return {success: false, msg: 'Could not fetch the posts'};
+			return {success: false, data: [], msg: 'Could not fetch the posts'};
 		}
 
-		return {success: true, data: data};
+		return {success: true, data: data || []};
 
 	} catch(error) {
 		console.error("fetchPosts error: ", error);
-		return {success: false, msg: 'Could not fetch the posts'};
+		return {success: false, data: [], msg: 'Could not fetch the posts'};
 	}
 
 };

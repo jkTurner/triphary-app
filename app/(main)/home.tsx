@@ -13,6 +13,7 @@ import PostCard from '@/components/PostCard'
 import Loading from '@/components/Loading'
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { getUserService } from '@/services/userService'
+import { VideoPlayer } from 'expo-video'
 
 interface Post {
 	id: string;
@@ -33,7 +34,8 @@ const Home = () => {
 	const [limit, setLimit] = useState(5);
 	const [hasMore, setHasMore] = useState(true);
 	const [isFetching, setIsFetching] = useState(false);
-	const [videoPlayerRefs, setVideoPlayerRefs] = useState<{ [key: string]: any }>({});
+
+	const [videoPlayerRefs, setVideoPlayerRefs] = useState<{ [key: string]: VideoPlayer }>({});
 
 	const handlePauseAllVideos = (currentId: string | number) => {
 		console.log(`▶️ Attempting to pause all videos except: ${currentId}`);
@@ -57,13 +59,15 @@ const Home = () => {
 		if (!hasMore || isFetching) return;
 
 		setIsFetching(true);
-		console.log('fetching post with limit: ', limit);
-		let res = await fetchPost(limit);
+		console.log(`Fetching posts: offset = ${posts.length}, limit = ${limit}`)
 
-		if (res.success) {
-			if (posts.length == res.data?.length) setHasMore(false);
-			setPosts(res.data ?? []);
-			setLimit(prev => prev + 5);
+		let res = await fetchPost(limit, posts.length);
+
+		if (res.success && res.data) {
+			setPosts(prev => [...prev, ...res.data]);
+
+			let checkHasMore = await fetchPost(1, posts.length + limit);
+			setHasMore(checkHasMore.success && checkHasMore.data?.length > 0);
 		}
 
 		setIsFetching(false);
@@ -73,7 +77,7 @@ const Home = () => {
 		if (payload.eventType == 'INSERT' && payload?.new?.id) {
 			const newPost = { ...payload.new };
 			const res = await getUserService(newPost.userId);
-			newPost.user = res.success? res.data: {};
+			newPost.user = res.success ? res.data : {};
 			setPosts(prevPosts => [newPost, ...prevPosts]);
 		}
 	}
@@ -123,7 +127,7 @@ const Home = () => {
 					data={posts}
 					showsVerticalScrollIndicator={false}
 					contentContainerStyle={styles.listStyle}
-					keyExtractor={item => item.id.toString()}
+					keyExtractor={(item) => item.id.toString()}
 					renderItem={({ item }) =>
 						<PostCard
 							item={item}

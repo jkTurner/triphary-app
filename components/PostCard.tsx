@@ -1,19 +1,24 @@
-import { StyleSheet, Text, TextStyle, TouchableOpacity, View, Image as RNImage, Alert } from 'react-native'
+import { StyleSheet, Text, TextStyle, TouchableOpacity, View, Image as RNImage, Alert, Share } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router';
 import { theme } from '@/constants/theme';
-import { hp, wp } from '@/helpers/common';
+import { hp, stripHtmlTags, wp } from '@/helpers/common';
 import Avatar from './Avatar';
 import moment from 'moment'
 import { CommentIcon, HeartIcon, HeartIconFilled, PlayIcon, ShareIcon, ThreeDotsIcon } from '@/assets/icons/Icons';
 import RenderHtml from 'react-native-render-html';
 import { Image } from 'expo-image';
 import { getImageDimensions, getUserMediaSrc, getVideoThumbnailSize } from '@/services/imageService';
-import { useVideoPlayer, VideoView } from 'expo-video';
+import { useVideoPlayer, VideoPlayer, VideoView } from 'expo-video';
 import { useEvent } from 'expo';
 import { createPostLike, removePostLike } from '@/services/postService';
 import { PostLikesType } from '@/types/types';
 
+interface User {
+	id: string;
+	name: string;
+	image?: string;
+}
 interface Post {
 	id: string;
 	content: string;
@@ -23,20 +28,13 @@ interface Post {
 	media?: string;
 	postLikes?: PostLikesType[];
 }
-
-interface User {
-	id: string;
-	name: string;
-	image?: string;
-}
-
 interface PostCardProps {
 	item: Post;
 	currentUser: User;
 	router: ReturnType<typeof useRouter>;
 	handlePauseAllVideos: (currentId: string) => void;
-	videoPlayerRefs: { [key: string]: any };
-	setVideoPlayerRefs: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
+	videoPlayerRefs: { [key: string]: VideoPlayer };
+	setVideoPlayerRefs: React.Dispatch<React.SetStateAction<{ [key: string]: VideoPlayer }>>;
 }
 
 const openPostDetail = () => {}
@@ -84,45 +82,45 @@ const PostCard: React.FC<PostCardProps> = ({
 	const [videoHeight, setVideoHeight] = useState(hp(40));
 	const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
 	const [showVideo, setShowVideo] = useState(false);
-	// const [liked, setLiked] = useState(false);
 	const [likes, setLikes] = useState<PostLikesType[]>([]);
-	const liked = likes.filter(like => like.userId == currentUser?.id) [0] ? true : false;
-	// const likes = [];
+	const liked = likes.some(like => like.userId === currentUser?.id);
 
 	useEffect(() => {
-		setLikes(item?.postLikes || []);
-	}, [item?.postLikes])
+		if (JSON.stringify(likes) !== JSON.stringify(item?.postLikes || [])) {
+			setLikes(item?.postLikes || []);
+		}
+	}, [item?.postLikes]);
 
 	const onLike = async () => {
 		console.log("onLike fires");
+
 		if (liked) {
-			let updatedLikes = likes.filter(like => like.userId!=currentUser?.id);
-			setLikes([...updatedLikes]);
-			let res = await removePostLike(item?.id, currentUser?.id);
-			console.log('removed like: ', res);
-			if(!res.success){
-				Alert.alert('Post', 'Something went wrong!');
-			}
-		} else {
-			let data = {
-				userId: currentUser?.id,
-				postId: item?.id
-			}
-			setLikes([...likes, data]);
-			let res = await createPostLike(data);
-			console.log('res: ', res);
+			const updatedLikes = likes.filter(like => like.userId !== currentUser?.id);
+			setLikes(updatedLikes);
+			const res = await removePostLike(item?.id, currentUser?.id);
 			if (!res.success) {
 				Alert.alert('Post', 'Something went wrong!');
+				setLikes([...likes]);
+			}
+		} else {
+			const newLike = { userId: currentUser?.id, postId: item?.id };
+			setLikes([...likes, newLike]);
+			const res = await createPostLike(newLike);
+			if (!res.success) {
+				Alert.alert('Post', 'Something went wrong!');
+				setLikes(prevLikes => prevLikes.filter(like => like.userId !== currentUser?.id));
 			}
 		}
+	};
+
+	const onShare = async () => {
+		// let content = { message: stripHtmlTags(item?.body ?? '') };
+		// Share.share(content);
 	}
 
 	useEffect(() => {
 		if (isVideo && videoPlayer) {
-			setVideoPlayerRefs((prev) => ({
-				...prev,
-				[item.id]: videoPlayer,
-			}));
+			setVideoPlayerRefs((prev) => ({ ...prev, [item.id]: videoPlayer }));
 		}
 	}, [videoPlayer]);
 
@@ -237,7 +235,7 @@ const PostCard: React.FC<PostCardProps> = ({
 				</View>
 				{/* share */}
 				<View style={styles.footerButton}>
-					<TouchableOpacity>
+					<TouchableOpacity onPress={onShare}>
 						<ShareIcon size={24} color={theme.colors.textLight} />
 					</TouchableOpacity>
 				</View>
